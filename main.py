@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 if __name__ == "__main__":
-    path = "/home/tpalayda/Desktop/studying/ppd/project/2018-05-26/part-0-0"
+    path = "data/2018-05-21/part-0-0"
 
     #TODO add specific dtypes to get rid of the warning
     #dtype={"versionID": numpy.uint64}
