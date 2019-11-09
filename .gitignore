@@ -7,9 +7,11 @@
 
 # Example code in package build process
 *-Ex.R
+*.R
 
 # Output files from R CMD build
 /*.tar.gz
+2018-05-26/
 
 # Output files from R CMD check
 /*.Rcheck/
