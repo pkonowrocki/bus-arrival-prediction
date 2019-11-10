@@ -5,19 +5,8 @@ import sys
 
 global_path = '/home/tpalayda/Desktop/studying/ppd/project/'
 
-def main():
-    path = global_path + '/2018-05-26/part-0-0'
-    data = read_data(path)
-
-    split_data_to_files(data)
-
-    show_rows(data, amount=10)
-    show_row_details(data, i=0)
-
-def read_data(path):
-    #TODO add specific dtypes to get rid of the warning
-    #dtype={"versionID": numpy.uint64}
-    column_names = ["versionID", "line", "brigade", "time", "lon", "lat", "rawLon", \
+def get_column_names():
+    return ["versionID", "line", "brigade", "time", "lon", "lat", "rawLon", \
                   "rawLat", "status", "delay", "delayAtStop", "plannedLeaveTime", \
                   "nearestStop", "nearestStopDistance", "nearestStopLon", \
                   "nearestStopLat", "previousStop", "previousStopLon", \
@@ -31,6 +20,20 @@ def read_data(path):
                   "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
                   "nextStopStopID", "coursDirectionStopStopID", "partition"]
 
+def main():
+    path = global_path + '/2018-05-26/part-0-0'
+    data = read_data(path)
+
+    split_data_to_files(data)
+
+    show_rows(data, amount=10)
+    show_row_details(data, i=0)
+
+def read_data(path):
+    #TODO add specific dtypes to get rid of the warning
+    #dtype={"versionID": numpy.uint64}
+
+    column_names = get_column_names()
     column_indices = range(len(column_names))
     col_idx = dict(zip(column_names, column_indices))
 
@@ -51,8 +54,8 @@ def split_data_to_files(data):
     
     lines = data['line'].unique()
     for line in lines:
-        data_for_line = (data['line'] == line)
-        data_for_line.to_csv(rf'{directory}/{line}.csv', header=False, mode = 'a+')
+        data_for_line = data.loc[data['line'] == line]
+        data_for_line.to_csv(rf'{directory}/{line}.csv', header=get_column_names(), mode = 'a+')
     print(f'Splitting data by line and saving it in {directory} - finished.')
 
 
