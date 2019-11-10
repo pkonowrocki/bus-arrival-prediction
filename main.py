@@ -1,23 +1,23 @@
 import pandas as pd
 import numpy as np
 import os
+import sys
 
-globalPath = 'data'
+global_path = '/home/tpalayda/Desktop/studying/ppd/project/'
 
 def main():
-    path = globalPath + '/2018-05-21/part-0-0'
-    data = readData(path)
+    path = global_path + '/2018-05-26/part-0-0'
+    data = read_data(path)
 
-    splitDataToFiles(data)
+    split_data_to_files(data)
 
-    showRows(data, amount=10)
-    showRowDetails(data, i=0)
+    show_rows(data, amount=10)
+    show_row_details(data, i=0)
 
-
-def readData(path):
+def read_data(path):
     #TODO add specific dtypes to get rid of the warning
     #dtype={"versionID": numpy.uint64}
-    columnNames = ["versionID", "line", "brigade", "time", "lon", "lat", "rawLon", \
+    column_names = ["versionID", "line", "brigade", "time", "lon", "lat", "rawLon", \
                   "rawLat", "status", "delay", "delayAtStop", "plannedLeaveTime", \
                   "nearestStop", "nearestStopDistance", "nearestStopLon", \
                   "nearestStopLat", "previousStop", "previousStopLon", \
@@ -30,32 +30,33 @@ def readData(path):
                   "serverID", "delayAtStopStopSequence", "previousStopStopSequence", \
                   "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
                   "nextStopStopID", "coursDirectionStopStopID", "partition"]
-    columnIndices = range(len(columnNames))
-    col_idx = dict(zip(columnNames, columnIndices))
 
-    indexesOfDateColumns = [col_idx['time'], col_idx['receivedTime'], col_idx['processingFinishedTime']]
+    column_indices = range(len(column_names))
+    col_idx = dict(zip(column_names, column_indices))
+
+    indexes_of_date_columns = [col_idx['time'], col_idx['receivedTime'], col_idx['processingFinishedTime']]
     data = pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), \
-        parse_dates = indexesOfDateColumns)
+        parse_dates = indexes_of_date_columns)
 
     data = data.sort_values(by=['line', 'brigade', 'time'], ascending=True)
     return data
 
 
-def splitDataToFiles(data):
+def split_data_to_files(data):
+    directory = rf'{global_path}/lines'
     print(f'Splitting data by line and saving it in {directory} - started.')
     
-    directory = rf'{globalPath}/lines'
     if not os.path.exists(directory):
         os.makedirs(directory)
     
     lines = data['line'].unique()
     for line in lines:
-        dataForLine = (data['line'] == line)
-        dataForLine.to_csv(rf'{directory}/{line}.csv', header=False, mode = 'a+')
+        data_for_line = (data['line'] == line)
+        data_for_line.to_csv(rf'{directory}/{line}.csv', header=False, mode = 'a+')
     print(f'Splitting data by line and saving it in {directory} - finished.')
 
 
-def showRows(data, amount):
+def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
     i = 0
     for ix, entry in data.iterrows():
@@ -68,7 +69,7 @@ def showRows(data, amount):
             break
 
 
-def showRowDetails(data, i):
+def show_row_details(data, i):
     print('\n\nExample of full data of a row:\n')
     print(data.iloc[i])
 

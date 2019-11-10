@@ -15,6 +15,8 @@
 # Output files from R CMD check
 /*.Rcheck/
 
+lines/
+
 # RStudio files
 .Rproj.user/
 
