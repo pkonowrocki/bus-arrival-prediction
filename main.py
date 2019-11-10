@@ -20,10 +20,16 @@ def get_column_names():
                   "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
                   "nextStopStopID", "coursDirectionStopStopID", "partition"]
 
+def parse_folder(path_to_directory):
+    for filename in os.listdir(path_to_directory):
+        data = read_data(path_to_directory + filename)
+        split_data_to_files(data)
+
 def main():
     path = global_path + '/2018-05-26/part-0-0'
     data = read_data(path)
 
+    #parse_folder(global_path + '/2018-05-26/')
     split_data_to_files(data)
 
     show_rows(data, amount=10)
@@ -70,7 +76,6 @@ def show_rows(data, amount):
         i += 1
         if i > amount:
             break
-
 
 def show_row_details(data, i):
     print('\n\nExample of full data of a row:\n')

@@ -8,6 +8,7 @@
 # Example code in package build process
 *-Ex.R
 *.R
+*.swp
 
 # Output files from R CMD build
 /*.tar.gz
