@@ -1,11 +1,18 @@
 import pandas as pd
 import numpy as np
+import os
+
+globalPath = 'data'
 
 def main():
-    path = "data/2018-05-21/part-0-0"
+    path = globalPath + '/2018-05-21/part-0-0'
     data = readData(path)
+
+    splitDataToFiles(data)
+
     showRows(data, amount=10)
     showRowDetails(data, i=0)
+
 
 def readData(path):
     #TODO add specific dtypes to get rid of the warning
@@ -33,6 +40,21 @@ def readData(path):
     data = data.sort_values(by=['line', 'brigade', 'time'], ascending=True)
     return data
 
+
+def splitDataToFiles(data):
+    print(f'Splitting data by line and saving it in {directory} - started.')
+    
+    directory = rf'{globalPath}/lines'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    
+    lines = data['line'].unique()
+    for line in lines:
+        dataForLine = (data['line'] == line)
+        dataForLine.to_csv(rf'{directory}/{line}.csv', header=False, mode = 'a+')
+    print(f'Splitting data by line and saving it in {directory} - finished.')
+
+
 def showRows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
     i = 0
@@ -44,6 +66,7 @@ def showRows(data, amount):
         i += 1
         if i > amount:
             break
+
 
 def showRowDetails(data, i):
     print('\n\nExample of full data of a row:\n')
