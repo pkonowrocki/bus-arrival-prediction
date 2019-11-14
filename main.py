@@ -3,7 +3,7 @@ import numpy as np
 import os
 import sys
 
-global_path = '/home/tpalayda/Desktop/studying/ppd/project/'
+global_path = 'data'
 
 def get_column_names():
     return ["versionID", "line", "brigade", "time", "lon", "lat", "rawLon", \
@@ -20,20 +20,34 @@ def get_column_names():
                   "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
                   "nextStopStopID", "coursDirectionStopStopID", "partition"]
 
-def parse_folder(path_to_directory):
-    for filename in os.listdir(path_to_directory):
-        data = read_data(path_to_directory + filename)
-        split_data_to_files(data)
-
 def main():
-    path = global_path + '/2018-05-26/part-0-0'
-    data = read_data(path)
+    # Read single file
+    #data = parse_file(global_path + '/2018-05-21/part-0-0')
 
-    #parse_folder(global_path + '/2018-05-26/')
+    # Read all files in one directory
+    parse_folder(global_path + '/2018-05-21')
+
+    # show_rows(data, amount=10)
+    # show_row_details(data, i=0)
+
+def parse_file(path_to_file):
+    data = read_data(path_to_file)
     split_data_to_files(data)
+    return data
 
-    show_rows(data, amount=10)
-    show_row_details(data, i=0)
+def parse_folder(path_to_directory):
+    print('Reading data from all files - started')
+    files = os.listdir(path_to_directory)
+    files = files[0:2] # todo: remove this line
+    n = len(files)
+    
+    for i, filename in enumerate(files):
+        path = f'{path_to_directory}/{filename}'
+        print(f'[{i+1}/{n}] Reading data from file {path} - started')
+        data = read_data(path)
+        split_data_to_files(data)
+        print(f'[{i+1}/{n}] Reading data from file {path} - finished')
+    print('Reading data from all files - finished')
 
 def read_data(path):
     #TODO add specific dtypes to get rid of the warning
@@ -50,20 +64,19 @@ def read_data(path):
     data = data.sort_values(by=['line', 'brigade', 'time'], ascending=True)
     return data
 
-
 def split_data_to_files(data):
     directory = rf'{global_path}/lines'
-    print(f'Splitting data by line and saving it in {directory} - started.')
     
     if not os.path.exists(directory):
         os.makedirs(directory)
     
     lines = data['line'].unique()
     for line in lines:
+        filename = rf'{directory}/{line}.csv'
+        # Only add headers if file does not exist yet
+        headers = None if os.path.exists(filename) else get_column_names()
         data_for_line = data.loc[data['line'] == line]
-        data_for_line.to_csv(rf'{directory}/{line}.csv', header=get_column_names(), mode = 'a+')
-    print(f'Splitting data by line and saving it in {directory} - finished.')
-
+        data_for_line.to_csv(filename, header=headers, mode = 'a+')
 
 def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
