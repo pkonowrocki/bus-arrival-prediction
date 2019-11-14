@@ -58,25 +58,33 @@ def read_data(path):
     col_idx = dict(zip(column_names, column_indices))
 
     indexes_of_date_columns = [col_idx['time'], col_idx['receivedTime'], col_idx['processingFinishedTime']]
-    data = pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), \
-        parse_dates = indexes_of_date_columns)
-
-    data = data.sort_values(by=['line', 'brigade', 'time'], ascending=True)
-    return data
+    return pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), parse_dates = indexes_of_date_columns)
 
 def split_data_to_files(data):
-    directory = rf'{global_path}/lines'
-    
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    parent_directory = rf'{global_path}/lines'
+    if not os.path.exists(parent_directory):
+        os.makedirs(parent_directory)
     
     lines = data['line'].unique()
     for line in lines:
-        filename = rf'{directory}/{line}.csv'
-        # Only add headers if file does not exist yet
-        headers = None if os.path.exists(filename) else get_column_names()
+
+        directory = rf'{parent_directory}/{line}'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         data_for_line = data.loc[data['line'] == line]
-        data_for_line.to_csv(filename, header=headers, mode = 'a+')
+        brigades = data_for_line['brigade'].unique()
+
+        for brigade in brigades:
+            data_for_brigade = data_for_line.loc[data_for_line['brigade'] == brigade]
+
+            while str(brigade)[0] is '0':
+                brigade = int(str(brigade)[1:])
+
+            filename = rf'{directory}/{line}-{brigade}.csv'
+            # Only add headers if file does not exist yet
+            headers = None if os.path.exists(filename) else get_column_names()
+            data_for_brigade.to_csv(filename, header=headers, mode = 'a+')
 
 def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
