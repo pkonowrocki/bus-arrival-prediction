@@ -38,7 +38,7 @@ def parse_file(path_to_file):
 def parse_folder(path_to_directory):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    files = files[0:2] # todo: remove this line
+    #files = files[0:2] # todo: remove this line
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -73,18 +73,22 @@ def split_data_to_files(data):
             os.makedirs(directory)
 
         data_for_line = data.loc[data['line'] == line]
-        brigades = data_for_line['brigade'].unique()
+        courses = data_for_line['courseID'].unique()
 
-        for brigade in brigades:
-            data_for_brigade = data_for_line.loc[data_for_line['brigade'] == brigade]
+        for course in courses:
+            data_for_course = data_for_line.loc[data_for_line['courseID'] == course]
 
-            while str(brigade)[0] is '0':
-                brigade = int(str(brigade)[1:])
+            course = str(course)
+            if course is None or course is '':
+                course = 'UNKNOWN'
+            else:
+                course = course.replace(' ', '')
+                course = course.replace(':', '')
 
-            filename = rf'{directory}/{line}-{brigade}.csv'
+            filename = rf'{directory}/{line}-{course}.csv'
             # Only add headers if file does not exist yet
             headers = None if os.path.exists(filename) else get_column_names()
-            data_for_brigade.to_csv(filename, header=headers, mode = 'a+')
+            data_for_course.to_csv(filename, header=headers, mode = 'a+')
 
 def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
