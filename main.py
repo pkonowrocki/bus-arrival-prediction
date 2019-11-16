@@ -1,10 +1,8 @@
 from utils import *
 
-global_path = 'data'
-
 def main():
     # Read single file
-    #data = parse_file(global_path + '/2018-05-21/part-0-0')
+    #data = parse_file(global_path + '/2018-05-26/part-0-0')
 
     # Read all files in one directory
     #parse_folder(global_path + '/2018-05-26')

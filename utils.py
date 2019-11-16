@@ -3,6 +3,8 @@ import numpy as np
 import os
 import sys
 
+global_path = 'data'
+
 def get_column_names():
     return ["versionID", "line", "brigade", "time", "lon", "lat", "rawLon", \
                   "rawLat", "status", "delay", "delayAtStop", "plannedLeaveTime", \
@@ -67,7 +69,7 @@ def split_data_to_files(data):
             data_for_course = data_for_line.loc[data_for_line['courseID'] == course]
 
             course = str(course)
-            if course is None or course is '':
+            if course == 'nan':
                 course = 'UNKNOWN'
             else:
                 course = course.replace(' ', '')
