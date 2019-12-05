@@ -15,7 +15,7 @@ def get_column_names():
                   "nextStopDistance", "nextStopTimetableVisitTime", "courseID", \
                   "courseDirection", "timetableID", "timetableStatus", "receivedTime", \
                   "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
-                  "overlapsWithNextBrigadeStopLineBrigade", "atStop", "speed", "oldDelay" \
+                  "overlapsWithNextBrigadeStopLineBrigade", "atStop", "speed", "oldDelay", \
                   "serverID", "delayAtStopStopSequence", "previousStopStopSequence", \
                   "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
                   "nextStopStopID", "coursDirectionStopStopID", "partition"]
