@@ -13,7 +13,7 @@ def parse_file(path_to_file):
 def parse_folder(path_to_directory):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    #files = files[0:2] # todo: remove this line
+    #files = files[0:1] # todo: remove this line
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -23,6 +23,7 @@ def parse_folder(path_to_directory):
         split_data_to_files(data)
         print(f'[{i+1}/{n}] Reading data from file {path} - finished')
     print('Reading data from all files - finished')
+    return data
 
 def read_data(path):
     #TODO add specific dtypes to get rid of the warning
@@ -36,6 +37,7 @@ def read_data(path):
     data = pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), parse_dates = indexes_of_date_columns)
     
     data.drop(excluded_columns(), axis=1, inplace=True)
+    data["atStop"] = data["atStop"].map({True: 1, False: 0})
     return data
 
 def split_data_to_files(data):
@@ -74,7 +76,7 @@ def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
     i = 0
     for ix, entry in data.iterrows():
-        cols = ['time', 'line', 'brigade']
+        cols = ['time', 'line']
         for col in cols:
             print(entry[col])
         print('\n')
