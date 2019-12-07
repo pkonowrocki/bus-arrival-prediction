@@ -39,5 +39,8 @@ vignettes/*.pdf
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
 
+# cache
+__pycache__/*
+
 # Project's data
 data/*

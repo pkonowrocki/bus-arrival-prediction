@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import sys
+#import geopy.distance
 
 global_path = 'data'
 
@@ -13,7 +14,7 @@ def parse_file(path_to_file):
 def parse_folder(path_to_directory):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    #files = files[0:1] # todo: remove this line
+    #files = files[0:2] # todo: remove this line
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -38,6 +39,8 @@ def read_data(path):
     
     data.drop(excluded_columns(), axis=1, inplace=True)
     data["atStop"] = data["atStop"].map({True: 1, False: 0})
+    # below is not needed, I leave it here in case it's useful in future
+    #data["next_dist"] = distance_between_2_points(data["lon"], data["lat"], data["nearestStopLon"], data["nearestStopLat"])
     return data
 
 def split_data_to_files(data):
@@ -76,7 +79,7 @@ def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
     i = 0
     for ix, entry in data.iterrows():
-        cols = ['time', 'line']
+        cols = ["time", "line"]
         for col in cols:
             print(entry[col])
         print('\n')
@@ -85,7 +88,7 @@ def show_rows(data, amount):
             break
 
 def show_row_details(data, i):
-    print('\n\nExample of full data of a row:\n')
+    print("\n\nExample of full data of a row:\n")
     print(data.iloc[i])
 
 def traverse_directory(path):
@@ -114,9 +117,26 @@ def in_column_names():
 def out_column_names():
     all_excluded_columns = excluded_columns()
     all_excluded_columns.append("line")
-    return [item for item in in_column_names() if item not in all_excluded_columns]
+
+    all_columns = in_column_names()
+    #all_columns.append("next_dist")
+    return [item for item in all_columns if item not in all_excluded_columns]
 
 def excluded_columns():
-    return ["versionID", "brigade", "rawLon", "rawLat", "nearestStop", \
-     "previousStop", "timetableID", "receivedTime", "processingFinishedTime", \
-     "onWayToDepot", "overlapsWithNextBrigade", "overlapsWithNextBrigadeStopLineBrigade"]
+    return ["versionID", "brigade", "lon", "lat", "rawLon", "rawLat", "nearestStop", \
+        "nearestStopLon", "nearestStopLat", "previousStop", "previousStopLon", \
+        "previousStopLat", "timetableID", "receivedTime", "processingFinishedTime", \
+        "onWayToDepot", "overlapsWithNextBrigade", "overlapsWithNextBrigadeStopLineBrigade"]
+
+def distance_between_2_points(lat1, lon1, lat2, lon2):
+    result = []
+
+    for i in range(len(lat1)):
+        if 0.0 in [lat1[i], lon1[i], lat2[i], lon2[i]]:
+            result.append(None)
+        else:
+            coords_1 = (lat1[i], lon1[i])
+            coords_2 = (lat2[i], lon2[i])
+            result.append(geopy.distance.vincenty(coords_1, coords_2).km)
+
+    return result
