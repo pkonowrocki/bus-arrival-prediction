@@ -5,21 +5,6 @@ import sys
 
 global_path = 'data'
 
-def get_column_names():
-    return ["versionID", "line", "brigade", "time", "lon", "lat", "rawLon", \
-                  "rawLat", "status", "delay", "delayAtStop", "plannedLeaveTime", \
-                  "nearestStop", "nearestStopDistance", "nearestStopLon", \
-                  "nearestStopLat", "previousStop", "previousStopLon", \
-                  "previousStopLat", "previousStopDistance", "previousStopArrivalTime", \
-                  "previousStopLeaveTime", "nextStop", "nextStopLon", "nextStopLat", \
-                  "nextStopDistance", "nextStopTimetableVisitTime", "courseID", \
-                  "courseDirection", "timetableID", "timetableStatus", "receivedTime", \
-                  "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
-                  "overlapsWithNextBrigadeStopLineBrigade", "atStop", "speed", "oldDelay", \
-                  "serverID", "delayAtStopStopSequence", "previousStopStopSequence", \
-                  "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
-                  "nextStopStopID", "coursDirectionStopStopID", "partition"]
-
 def parse_file(path_to_file):
     data = read_data(path_to_file)
     split_data_to_files(data)
@@ -43,18 +28,21 @@ def read_data(path):
     #TODO add specific dtypes to get rid of the warning
     #dtype={"versionID": numpy.uint64}
 
-    column_names = get_column_names()
+    column_names = in_column_names()
     column_indices = range(len(column_names))
     col_idx = dict(zip(column_names, column_indices))
 
     indexes_of_date_columns = [col_idx['time'], col_idx['receivedTime'], col_idx['processingFinishedTime']]
-    return pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), parse_dates = indexes_of_date_columns)
+    data = pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), parse_dates = indexes_of_date_columns)
+    
+    data.drop(excluded_columns(), axis=1, inplace=True)
+    return data
 
 def split_data_to_files(data):
     parent_directory = rf'{global_path}/lines'
     if not os.path.exists(parent_directory):
         os.makedirs(parent_directory)
-    
+
     lines = data['line'].unique()
     for line in lines:
 
@@ -63,6 +51,8 @@ def split_data_to_files(data):
             os.makedirs(directory)
 
         data_for_line = data.loc[data['line'] == line]
+        data_for_line.drop("line", axis=1, inplace=True)
+
         courses = data_for_line['courseID'].unique()
 
         for course in courses:
@@ -77,8 +67,8 @@ def split_data_to_files(data):
 
             filename = rf'{directory}/{line}-{course}.csv'
             # Only add headers if file does not exist yet
-            headers = None if os.path.exists(filename) else get_column_names()
-            data_for_course.to_csv(filename, header=headers, mode = 'a+')
+            headers = None if os.path.exists(filename) else out_column_names()
+            data_for_course.to_csv(filename, header=headers, mode = 'a+', index=False)
 
 def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
@@ -103,3 +93,28 @@ def traverse_directory(path):
         for f in files:
             filenames[os.path.basename(root)].append(f)
     return filenames
+
+def in_column_names():
+    return ["versionID", "line", "brigade", "time", "lon", "lat", "rawLon", \
+                  "rawLat", "status", "delay", "delayAtStop", "plannedLeaveTime", \
+                  "nearestStop", "nearestStopDistance", "nearestStopLon", \
+                  "nearestStopLat", "previousStop", "previousStopLon", \
+                  "previousStopLat", "previousStopDistance", "previousStopArrivalTime", \
+                  "previousStopLeaveTime", "nextStop", "nextStopLon", "nextStopLat", \
+                  "nextStopDistance", "nextStopTimetableVisitTime", "courseID", \
+                  "courseDirection", "timetableID", "timetableStatus", "receivedTime", \
+                  "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
+                  "overlapsWithNextBrigadeStopLineBrigade", "atStop", "speed", "oldDelay", \
+                  "serverID", "delayAtStopStopSequence", "previousStopStopSequence", \
+                  "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
+                  "nextStopStopID", "coursDirectionStopStopID", "partition"]
+
+def out_column_names():
+    all_excluded_columns = excluded_columns()
+    all_excluded_columns.append("line")
+    return [item for item in in_column_names() if item not in all_excluded_columns]
+
+def excluded_columns():
+    return ["versionID", "brigade", "rawLon", "rawLat", "nearestStop", \
+     "previousStop", "timetableID", "receivedTime", "processingFinishedTime", \
+     "onWayToDepot", "overlapsWithNextBrigade", "overlapsWithNextBrigadeStopLineBrigade"]
