@@ -62,6 +62,7 @@ def split_data_to_files(data):
 
         for course in courses:
             data_for_course = data_for_line.loc[data_for_line['courseID'] == course]
+            data_for_course.drop("courseID", axis=1, inplace=True)
 
             course = str(course)
             if course == 'nan':
@@ -106,7 +107,7 @@ def in_column_names():
                   "nearestStopLat", "previousStop", "previousStopLon", \
                   "previousStopLat", "previousStopDistance", "previousStopArrivalTime", \
                   "previousStopLeaveTime", "nextStop", "nextStopLon", "nextStopLat", \
-                  "nextStopDistance", "nextStopTimetableVisitTime", "courseID", \
+                  "nextStopDistance", "nextStopTimetableVisitTime", "courseID",
                   "courseDirection", "timetableID", "timetableStatus", "receivedTime", \
                   "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
                   "overlapsWithNextBrigadeStopLineBrigade", "atStop", "speed", "oldDelay", \
@@ -117,6 +118,7 @@ def in_column_names():
 def out_column_names():
     all_excluded_columns = excluded_columns()
     all_excluded_columns.append("line")
+    all_excluded_columns.append("courseID")
 
     all_columns = in_column_names()
     #all_columns.append("next_dist")
@@ -125,8 +127,9 @@ def out_column_names():
 def excluded_columns():
     return ["versionID", "brigade", "lon", "lat", "rawLon", "rawLat", "nearestStop", \
         "nearestStopLon", "nearestStopLat", "previousStop", "previousStopLon", \
-        "previousStopLat", "timetableID", "receivedTime", "processingFinishedTime", \
-        "onWayToDepot", "overlapsWithNextBrigade", "overlapsWithNextBrigadeStopLineBrigade"]
+        "previousStopLat", "nextStopLon", "nextStopLat", "timetableID", \
+        "receivedTime", "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
+        "overlapsWithNextBrigadeStopLineBrigade"]
 
 def distance_between_2_points(lat1, lon1, lat2, lon2):
     result = []
