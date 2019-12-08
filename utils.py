@@ -129,7 +129,7 @@ def excluded_columns():
         "nearestStopLon", "nearestStopLat", "previousStop", "previousStopLon", \
         "previousStopLat", "nextStopLon", "nextStopLat", "timetableID", \
         "receivedTime", "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
-        "overlapsWithNextBrigadeStopLineBrigade"]
+        "overlapsWithNextBrigadeStopLineBrigade", "serverID"]
 
 def distance_between_2_points(lat1, lon1, lat2, lon2):
     result = []
