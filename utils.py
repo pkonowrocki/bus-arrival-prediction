@@ -3,8 +3,11 @@ import numpy as np
 import os
 import sys
 #import geopy.distance
+from warsawSectors import WarsawSectors
 
 global_path = 'data'
+
+debug = False
 
 def parse_file(path_to_file):
     data = read_data(path_to_file)
@@ -39,8 +42,12 @@ def read_data(path):
     
     data.drop(excluded_columns(), axis=1, inplace=True)
     data["atStop"] = data["atStop"].map({True: 1, False: 0})
+    data["nearestStopDistance"] = round(data["nearestStopDistance"], 0).astype(int)
+    data["previousStopDistance"] = round(data["previousStopDistance"], 0).astype(int)
+    data["nextStopDistance"] = round(data["nextStopDistance"], 0).astype(int)
     # below is not needed, I leave it here in case it's useful in future
     #data["next_dist"] = distance_between_2_points(data["lon"], data["lat"], data["nearestStopLon"], data["nearestStopLat"])
+    data["sector"] = get_sectors(data["lon"], data["lat"])
     return data
 
 def split_data_to_files(data):
@@ -122,6 +129,7 @@ def out_column_names():
 
     all_columns = in_column_names()
     #all_columns.append("next_dist")
+    all_columns.append("sector")
     return [item for item in all_columns if item not in all_excluded_columns]
 
 def excluded_columns():
@@ -131,7 +139,20 @@ def excluded_columns():
         "receivedTime", "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
         "overlapsWithNextBrigadeStopLineBrigade", "serverID"]
 
-def distance_between_2_points(lat1, lon1, lat2, lon2):
+def get_sectors(lat_list, lon_list):
+    warsaw = WarsawSectors(debug, 10)
+    result = []
+
+    for i in range(len(lat_list)):
+        if debug:
+            print(f'\nIteration #{i+1}')
+            if i > 10:
+                exit()
+        result.append(warsaw.get_sector(lat_list[i], lon_list[i]))
+
+    return result
+
+def distance_between_2_points(lon1, lat1, lon2, lat2):
     result = []
 
     for i in range(len(lat1)):
