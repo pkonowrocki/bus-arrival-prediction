@@ -17,7 +17,7 @@ def parse_file(path_to_file):
 def parse_folder(path_to_directory):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    #files = files[0:2] # todo: remove this line
+    files = files[0:2] # todo: remove this line
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -47,7 +47,7 @@ def read_data(path):
     data["nextStopDistance"] = round(data["nextStopDistance"], 0).astype(int)
     # below is not needed, I leave it here in case it's useful in future
     #data["next_dist"] = distance_between_2_points(data["lon"], data["lat"], data["nearestStopLon"], data["nearestStopLat"])
-    data["sector"] = get_sectors(data["lon"], data["lat"])
+    #data["sector"] = get_sectors(data["lon"], data["lat"])
     return data
 
 def split_data_to_files(data):
@@ -129,13 +129,13 @@ def out_column_names():
 
     all_columns = in_column_names()
     #all_columns.append("next_dist")
-    all_columns.append("sector")
+    #all_columns.append("sector")
     return [item for item in all_columns if item not in all_excluded_columns]
 
 def excluded_columns():
-    return ["versionID", "brigade", "lon", "lat", "rawLon", "rawLat", "nearestStop", \
+    return ["versionID", "brigade", "lon", "lat", "rawLon", "rawLat", "delayAtStop", "nearestStop", \
         "nearestStopLon", "nearestStopLat", "previousStop", "previousStopLon", \
-        "previousStopLat", "nextStopLon", "nextStopLat", "timetableID", \
+        "previousStopLat", "nextStop", "nextStopLon", "nextStopLat", "courseDirection", "timetableID", \
         "receivedTime", "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
         "overlapsWithNextBrigadeStopLineBrigade", "serverID"]
 
