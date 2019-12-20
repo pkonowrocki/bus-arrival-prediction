@@ -126,7 +126,7 @@ def in_column_names():
                   "overlapsWithNextBrigadeStopLineBrigade", "atStop", "speed", "oldDelay", \
                   "serverID", "delayAtStopStopSequence", "previousStopStopSequence", \
                   "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
-                  "nextStopStopID", "coursDirectionStopStopID", "partition"]
+                  "nextStopStopID", "courseDirectionStopStopID", "partition"]
 
 def out_column_names():
     all_excluded_columns = excluded_columns()
