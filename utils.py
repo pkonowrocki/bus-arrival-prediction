@@ -137,7 +137,8 @@ def excluded_columns():
         "nearestStopLon", "nearestStopLat", "previousStop", "previousStopLon", \
         "previousStopLat", "nextStop", "nextStopLon", "nextStopLat", "courseDirection", "timetableID", \
         "receivedTime", "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
-        "overlapsWithNextBrigadeStopLineBrigade", "serverID"]
+        "overlapsWithNextBrigadeStopLineBrigade", "serverID", "delayAtStopStopID", "previousStopStopID", \
+        "nextStopStopID"]
 
 def get_sectors(lat_list, lon_list):
     warsaw = WarsawSectors(debug, 10)
