@@ -37,10 +37,16 @@ def read_data(path):
     column_indices = range(len(column_names))
     col_idx = dict(zip(column_names, column_indices))
 
-    indexes_of_date_columns = [col_idx['time'], col_idx['receivedTime'], col_idx['processingFinishedTime']]
+    indexes_of_date_columns = [col_idx['time'], col_idx['plannedLeaveTime'], col_idx['previousStopArrivalTime'], \
+        col_idx['previousStopLeaveTime'], col_idx['nextStopTimetableVisitTime']]
     data = pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), parse_dates = indexes_of_date_columns)
     
     data.drop(excluded_columns(), axis=1, inplace=True)
+    data["time"] = get_time(data["time"])
+    data["plannedLeaveTime"] = get_time(data["plannedLeaveTime"])
+    data["previousStopArrivalTime"] = get_time(data["previousStopArrivalTime"])
+    data["previousStopLeaveTime"] = get_time(data["previousStopLeaveTime"])
+    data["nextStopTimetableVisitTime"] = get_time(data["nextStopTimetableVisitTime"])
     data["atStop"] = data["atStop"].map({True: 1, False: 0})
     data["nearestStopDistance"] = round(data["nearestStopDistance"], 0).astype(int)
     data["previousStopDistance"] = round(data["previousStopDistance"], 0).astype(int)
@@ -139,6 +145,16 @@ def excluded_columns():
         "receivedTime", "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
         "overlapsWithNextBrigadeStopLineBrigade", "serverID", "delayAtStopStopID", "previousStopStopID", \
         "nextStopStopID"]
+
+def get_time(date_time_list):
+    result = []
+    for date_time in date_time_list:
+        if issubclass(type(date_time), type(pd.NaT)):
+            # TODO: maybe we should calculate value based on neighbors
+            result.append("")
+        else:
+            result.append(date_time.strftime("%H:%M"))
+    return result
 
 def get_sectors(lat_list, lon_list):
     warsaw = WarsawSectors(debug, 10)
