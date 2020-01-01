@@ -144,7 +144,7 @@ def excluded_columns():
         "previousStopLat", "nextStop", "nextStopLon", "nextStopLat", "courseDirection", "timetableID", \
         "receivedTime", "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
         "overlapsWithNextBrigadeStopLineBrigade", "serverID", "delayAtStopStopID", "previousStopStopID", \
-        "nextStopStopID"]
+        "nextStopStopID", "courseDirectionStopStopID", "partition"]
 
 def get_time(date_time_list):
     result = []
