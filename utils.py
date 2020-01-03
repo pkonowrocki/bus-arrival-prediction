@@ -82,7 +82,7 @@ def split_data_to_files(data):
 
             course = str(course)
             if course == 'nan':
-                course = 'UNKNOWN'
+                continue
             else:
                 course = course.replace(' ', '')
                 course = course.replace(':', '')
