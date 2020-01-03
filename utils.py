@@ -53,6 +53,7 @@ def read_data(path):
     data["nearestStopDistance"] = round(data["nearestStopDistance"], 0).astype(int)
     data["previousStopDistance"] = round(data["previousStopDistance"], 0).astype(int)
     data["nextStopDistance"] = round(data["nextStopDistance"], 0).astype(int)
+    data["delay_status"] = get_delay_status(data["delay"])
     # below is not needed, I leave it here in case it's useful in future
     #data["next_dist"] = distance_between_2_points(data["lon"], data["lat"], data["nearestStopLon"], data["nearestStopLat"])
     #data["sector"] = get_sectors(data["lon"], data["lat"])
@@ -138,6 +139,7 @@ def out_column_names():
     all_columns = in_column_names()
     #all_columns.append("next_dist")
     #all_columns.append("sector")
+    all_columns.append("delay_status")
     return [item for item in all_columns if item not in all_excluded_columns]
 
 def excluded_columns():
@@ -156,6 +158,18 @@ def get_time(date_time_list):
             result.append("")
         else:
             result.append(date_time.strftime("%H:%M"))
+    return result
+
+def get_delay_status(delay_list):
+    result = []
+
+    for delay in delay_list:
+        if delay > 180:
+            result.append(1)
+        elif delay < -120:
+            result.append(-1)
+        else:
+            result.append(0)
     return result
 
 def get_sectors(lat_list, lon_list):
