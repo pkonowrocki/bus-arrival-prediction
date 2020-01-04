@@ -14,7 +14,7 @@ def parse_file(path_to_file):
     split_data_to_files(data)
     return data
 
-def parse_folder(path_to_directory):
+def parse_folder(path_to_directory, is_one_file):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
     files = files[0:2] # todo: remove this line
@@ -24,7 +24,10 @@ def parse_folder(path_to_directory):
         path = f'{path_to_directory}/{filename}'
         print(f'[{i+1}/{n}] Reading data from file {path} - started')
         data = read_data(path)
-        split_data_to_files(data)
+        if not is_one_file:
+            split_data_to_files(data)
+        else:
+            save_data_to_one_file(data)
         print(f'[{i+1}/{n}] Reading data from file {path} - finished')
     print('Reading data from all files - finished')
     return data
@@ -92,6 +95,11 @@ def split_data_to_files(data):
             headers = None if os.path.exists(filename) else out_column_names()
             data_for_course.to_csv(filename, header=headers, mode = 'a+', index=False)
 
+def save_data_to_one_file(data):
+    filename = rf'{global_path}/all-lines.csv'
+    headers = out_column_names(is_one_file = True)
+    data.to_csv(filename, header=headers, mode = 'w', index=False)
+
 def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
     i = 0
@@ -131,10 +139,11 @@ def in_column_names():
                   "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
                   "nextStopStopID", "courseDirectionStopStopID", "partition"]
 
-def out_column_names():
+def out_column_names(is_one_file = False):
     all_excluded_columns = excluded_columns()
-    all_excluded_columns.append("line")
-    all_excluded_columns.append("courseID")
+    if not is_one_file:
+        all_excluded_columns.append("line")
+        all_excluded_columns.append("courseID")
 
     all_columns = in_column_names()
     #all_columns.append("next_dist")
