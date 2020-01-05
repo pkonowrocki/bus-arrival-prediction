@@ -7,7 +7,7 @@ def main():
     #data = parse_file(global_path + '/2018-05-26/part-0-0')
 
     # Read all files in one directory
-    is_one_file = False
+    is_one_file = True
     data = parse_folder(global_path + '/2018-05-21', is_one_file)
 
     # show_rows(data, amount=10)

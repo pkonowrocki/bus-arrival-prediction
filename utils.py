@@ -17,7 +17,7 @@ def parse_file(path_to_file):
 def parse_folder(path_to_directory, is_one_file):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    files = files[0:2] # todo: remove this line
+    #files = files[0:2] # todo: remove this line
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -96,7 +96,10 @@ def split_data_to_files(data):
             data_for_course.to_csv(filename, header=headers, mode = 'a+', index=False)
 
 def save_data_to_one_file(data):
-    filename = rf'{global_path}/all-lines.csv'
+    data.drop("line", axis=1, inplace=True)
+    data.drop("courseID", axis=1, inplace=True)
+
+    filename = rf'{global_path}/all.csv'
     headers = out_column_names(is_one_file = True)
     data.to_csv(filename, header=headers, mode = 'w', index=False)
 
@@ -141,9 +144,8 @@ def in_column_names():
 
 def out_column_names(is_one_file = False):
     all_excluded_columns = excluded_columns()
-    if not is_one_file:
-        all_excluded_columns.append("line")
-        all_excluded_columns.append("courseID")
+    all_excluded_columns.append("line")
+    all_excluded_columns.append("courseID")
 
     all_columns = in_column_names()
     #all_columns.append("next_dist")

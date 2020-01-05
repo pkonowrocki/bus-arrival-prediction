@@ -1,5 +1,5 @@
 path ='C://Users/arkadiusz.ryszewski/Desktop/PPD - Project/bus-arrival-prediction/data/';
-filename = 'all-lines.csv'
+filename = 'all.csv'
 
 data = read.csv(paste(path,filename,sep=''))
 
