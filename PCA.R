@@ -6,7 +6,7 @@ data = read.csv(paste(path,filename,sep=''));
 data = na.omit(data);
 
 timezone = "Europe/Warsaw";
-format = "%d.%m.%YT%H:%M:%S";
+format = "%Y-%m-%dT%H:%M:%S";
 data$time <- as.POSIXct(data$time, format, tz = timezone);
 data$plannedLeaveTime <- as.POSIXct(data$plannedLeaveTime, format, tz = timezone);
 data$previousStopArrivalTime <- as.POSIXct(data$previousStopArrivalTime, format, tz = timezone);
