@@ -176,11 +176,11 @@ def get_delay_status(delay_list):
 
     for delay in delay_list:
         if delay > 180:
-            result.append(2)
+            result.append(3)
         elif delay < -120:
-            result.append(1)
+            result.append(2)
         else:
-            result.append(0)
+            result.append(1)
     return result
 
 def get_sectors(lat_list, lon_list):
