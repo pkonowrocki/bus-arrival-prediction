@@ -176,9 +176,9 @@ def get_delay_status(delay_list):
 
     for delay in delay_list:
         if delay > 180:
-            result.append(1)
+            result.append(2)
         elif delay < -120:
-            result.append(-1)
+            result.append(1)
         else:
             result.append(0)
     return result
