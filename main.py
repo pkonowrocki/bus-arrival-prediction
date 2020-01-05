@@ -4,9 +4,9 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
-
-global_path = 'testing_data'
+global_path = 'data'
 
 def build_model(input_shape):
     model = keras.Sequential([
@@ -24,6 +24,11 @@ def build_model(input_shape):
 def norm(x, stats):
     return (x - stats['mean']) / stats['std']
 
+def plot_data(df: pd.DataFrame):
+    sns.pairplot(df[["delay", "time", "plannedLeaveTime", "nearestStopDistance",
+                     "speed", "nextStopDistance"]], diag_kind="kde")
+    plt.show()
+
 def main():
     # Read single file
     #data = parse_file(global_path + '/2018-05-26/part-0-0')
@@ -37,51 +42,46 @@ def main():
     # show_row_details(data, i=0)
 
     # filenames is hashmap in form of -> line (string) : list (list of strings)
-    filenames = traverse_directory(global_path + "/lines")
-
-    line_157 = filenames["157"]
-
-    testing_data = []
-    training_data = []
-
-    for i, filename in enumerate(line_157):
-        if(i % 4 == 0):
-            testing_data.append(filename)
-        else:
-            training_data.append(filename)
-
-    train_dataset = pd.read_csv('testing_data/lines/157/' + training_data[0])
-    test_dataset = pd.read_csv('testing_data/lines/157/' + testing_data[0])
     
-    train_dataset.dropna()
-    test_dataset.dropna()
+    filenames = traverse_directory("testing_data2/" + "/lines")
+    number_of_features = 12
 
-    train_dataset.pop("time")
-    train_dataset.pop("plannedLeaveTime")
-    train_dataset.pop("previousStopArrivalTime")
-    train_dataset.pop("previousStopLeaveTime")
-    train_dataset.pop("nextStopTimetableVisitTime")
+    model = build_model(number_of_features)
 
-    test_dataset.pop("time")
-    test_dataset.pop("plannedLeaveTime")
-    test_dataset.pop("previousStopArrivalTime")
-    test_dataset.pop("previousStopLeaveTime")
-    test_dataset.pop("nextStopTimetableVisitTime")
-
-    train_labels = train_dataset.pop("delay_status")
-    test_labels = test_dataset.pop("delay_status")
     class_names = ["late", "early", "on time"]
 
-    model = build_model(len(train_dataset.keys()))
+    for line_number, line in filenames.items():
+        training_datafiles, testing_datafiles = train_test_split(line, test_size=0.3)
 
-    model.fit(train_dataset, train_labels, epochs=10)
+        for training_datafile in training_datafiles:
+            train_dataset = pd.read_csv('testing_data2/lines/' + line_number + \
+                                        '/' + training_datafile)
 
-    test_loss, test_acc = model.evaluate(test_dataset, test_labels, verbose=2)
+            train_dataset.dropna()
+            train_dataset.pop("time")
+            train_dataset.pop("plannedLeaveTime")
+            train_dataset.pop("previousStopArrivalTime")
+            train_dataset.pop("previousStopLeaveTime")
+            train_dataset.pop("nextStopTimetableVisitTime")
 
-    print('\nTest accuracy:', test_acc)
 
-    #sns.pairplot(df[["delay", "time", "plannedLeaveTime", "nearestStopDistance", "speed", "nextStopDistance"]], diag_kind="kde")
-    #plt.show()
-    
+            train_labels = train_dataset.pop("delay_status")
+            model.fit(train_dataset, train_labels, epochs=10, verbose=1)
+
+        for testing_datafile in testing_datafiles:
+            test_dataset = pd.read_csv('testing_data2/lines/' + line_number + \
+                                        '/' + testing_datafile)
+            test_dataset.dropna()
+            test_dataset.pop("time")
+            test_dataset.pop("plannedLeaveTime")
+            test_dataset.pop("previousStopArrivalTime")
+            test_dataset.pop("previousStopLeaveTime")
+            test_dataset.pop("nextStopTimetableVisitTime")
+            test_labels = test_dataset.pop("delay_status")
+
+            test_loss, test_acc = model.evaluate(test_dataset, test_labels)
+
+            print('\nTest accuracy:', test_acc)
+
 if __name__ == "__main__":
     main()

@@ -45,7 +45,7 @@ def read_data(path):
     data = pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), parse_dates = indexes_of_date_columns)
     
     data.drop(excluded_columns(), axis=1, inplace=True)
-    data["status"] = data["status"].map({'UNKNOWN': None, 'STOPPED': '0', 'MOVING_SLOWLY': '1', 'MOVING': '2'}) # Gray code
+    data["status"] = data["status"].map({'UNKNOWN': None, 'STOPPED': '0', 'MOVING_SLOWLY': '1', 'MOVING': '2'})
     data["timetableStatus"] = data["timetableStatus"].map({'UNSAFE': '0', 'SAFE': '1'})
     #data["time"] = get_time(data["time"])
     #data["plannedLeaveTime"] = get_time(data["plannedLeaveTime"])
