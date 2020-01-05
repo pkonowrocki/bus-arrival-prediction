@@ -14,7 +14,7 @@ def parse_file(path_to_file):
     split_data_to_files(data)
     return data
 
-def parse_folder(path_to_directory, is_one_file):
+def parse_folder(path_to_directory, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
     #files = files[0:2] # todo: remove this line
