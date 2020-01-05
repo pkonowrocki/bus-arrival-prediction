@@ -89,17 +89,29 @@ def main():
     #print(train_dataset.tail())
 
     #print(train_dataset.describe())
-    #train_dataset = norm(train_dataset, train_dataset.describe().transpose())
-    #train_dataset["delay_status"] = 1
+    train_dataset = norm(train_dataset, train_dataset.describe().transpose())
+
+    train_dataset["delay_status"] = 1
+    train_dataset["timetableStatus"] = 1
+
     #print(train_dataset)
     #plot_data(train_dataset)
 
-    #train_labels = train_dataset.pop("delay_status")
-    #test_labels = test_dataset.pop("delay_status")
-
-    #model.fit(train_dataset, train_labels, epochs=10, verbose=1)
+    train_labels = train_dataset.pop("delay_status")
+    test_labels = test_dataset.pop("delay_status")
+    
+    for row in train_dataset.iterrows():
+        print(row)
+    
+    model.fit(train_dataset, train_labels, epochs=10, verbose=1)
 
     #test_loss, test_acc = model.evaluate(test_dataset, test_labels)
+    predictions = model.predict(test_dataset)
+    print(predictions[0])
+    print(np.argmax(predictions[0]))
+    print(test_labels[0])
+
+
 
     #print('\nTest accuracy:', test_acc)
 
