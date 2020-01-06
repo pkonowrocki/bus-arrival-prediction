@@ -14,6 +14,9 @@ def parse_file(path_to_file):
     split_data_to_files(data)
     return data
 
+def create_file_for_PCA(path_to_directory):
+    parse_folder(path_to_directory, is_one_file=True)
+
 def parse_folder(path_to_directory, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
@@ -47,11 +50,11 @@ def read_data(path):
     data.drop(excluded_columns(), axis=1, inplace=True)
     data["status"] = data["status"].map({'UNKNOWN': None, 'STOPPED': '0', 'MOVING_SLOWLY': '1', 'MOVING': '2'})
     data["timetableStatus"] = data["timetableStatus"].map({'UNSAFE': '0', 'SAFE': '1'})
-    #data["time"] = get_time(data["time"])
-    #data["plannedLeaveTime"] = get_time(data["plannedLeaveTime"])
-    #data["previousStopArrivalTime"] = get_time(data["previousStopArrivalTime"])
-    #data["previousStopLeaveTime"] = get_time(data["previousStopLeaveTime"])
-    #data["nextStopTimetableVisitTime"] = get_time(data["nextStopTimetableVisitTime"])
+    data["time"] = get_time(data["time"])
+    data["plannedLeaveTime"] = get_time(data["plannedLeaveTime"])
+    data["previousStopArrivalTime"] = get_time(data["previousStopArrivalTime"])
+    data["previousStopLeaveTime"] = get_time(data["previousStopLeaveTime"])
+    data["nextStopTimetableVisitTime"] = get_time(data["nextStopTimetableVisitTime"])
     data["atStop"] = data["atStop"].map({True: 1, False: 0})
     data["nearestStopDistance"] = round(data["nearestStopDistance"], 0).astype(int)
     data["previousStopDistance"] = round(data["previousStopDistance"], 0).astype(int)
