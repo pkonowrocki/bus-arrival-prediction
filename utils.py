@@ -171,7 +171,7 @@ def get_time(date_time_list):
             # TODO: maybe we should calculate value based on neighbors
             result.append("")
         else:
-            result.append(date_time.strftime("%H:%M"))
+            result.append(date_time.strftime("%H%M"))
     return result
 
 def get_delay_status(delay_list):
