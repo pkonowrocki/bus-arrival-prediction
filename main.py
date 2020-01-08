@@ -8,8 +8,8 @@ def main():
     #data = parse_file(global_path + '/2018-05-26/part-0-0')
 
     # Read all files in one directory
-    create_file_for_PCA(global_path + '/2018-05-21')
-    #data = parse_folder(global_path + '/2018-05-21')
+    #create_single_file(global_path + '/2018-05-21')
+    data = parse_folder(global_path + '/2018-05-21')
     #data = parse_folder(global_path + '/2018-05-26/')
 
     # show_rows(data, amount=10)

@@ -14,7 +14,7 @@ def parse_file(path_to_file):
     split_data_to_files(data)
     return data
 
-def create_file_for_PCA(path_to_directory):
+def create_single_file(path_to_directory):
     parse_folder(path_to_directory, is_one_file=True)
 
 def parse_folder(path_to_directory, is_one_file=False):
@@ -104,7 +104,7 @@ def save_data_to_one_file(data):
 
     filename = rf'{global_path}/all.csv'
     headers = out_column_names(is_one_file = True)
-    data.to_csv(filename, header=headers, mode = 'w', index=False)
+    data.to_csv(filename, header=headers, mode = 'a+', index=False)
 
 def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
