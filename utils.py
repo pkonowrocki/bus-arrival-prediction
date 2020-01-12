@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 #import geopy.distance
 from warsawSectors import WarsawSectors
 
-global_path = 'data'
+global_path = 'testing_data4'
 
 debug = False
 
@@ -22,7 +22,7 @@ def create_single_file(path_to_directory):
 def parse_folder(path_to_directory, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    files = files[0:2]
+    files = files[0:1]
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -57,10 +57,13 @@ def parse_folder_PCA(path_to_directory):
         print(f'[{i+1}/{n}] Reading data from file {path} - finished')
     print('Reading data from all files - finished')
 
+    #print(data.shape)
+    data.dropna(inplace=True)
+    #print(data.shape)
     print('Processing - started')
     data = StandardScaler().fit_transform(data)
     principalComponents = PCA(n_components=9).fit_transform(data)
-    principalDf = pd.DataFrame(data = principalComponents, columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9'])
+    principalDf = pd.DataFrame(data=principalComponents, columns=['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9'])
     print('Processing - finished')
 
     print('Saving to file - started')
@@ -213,11 +216,11 @@ def get_delay_status(delay_list):
 
     for delay in delay_list:
         if delay > 180:
-            result.append(3)
-        elif delay < -120:
             result.append(2)
-        else:
+        elif delay < -120:
             result.append(1)
+        else:
+            result.append(0)
     return result
 
 def get_sectors(lat_list, lon_list):
