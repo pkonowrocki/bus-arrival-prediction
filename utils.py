@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import os
 import sys
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 #import geopy.distance
 from warsawSectors import WarsawSectors
 
@@ -14,10 +16,13 @@ def parse_file(path_to_file):
     split_data_to_files(data)
     return data
 
+def create_single_file(path_to_directory):
+    parse_folder(path_to_directory, is_one_file=True)
+
 def parse_folder(path_to_directory, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    #files = files[0:2] # todo: remove this line
+    files = files[0:2]
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -32,6 +37,38 @@ def parse_folder(path_to_directory, is_one_file=False):
     print('Reading data from all files - finished')
     return data
 
+def parse_folder_PCA(path_to_directory):
+    print('Reading data from all files - started')
+    files = os.listdir(path_to_directory)
+    files = files[0:2]
+    n = len(files)
+    data = None
+
+    for i, filename in enumerate(files):
+        path = f'{path_to_directory}/{filename}'
+        print(f'[{i+1}/{n}] Reading data from file {path} - started')
+        if data is None:
+            data = read_data(path)
+            data.drop(["line", "courseID"], axis=1, inplace=True)
+        else:
+            data_temp = read_data(path)
+            data_temp.drop(["line", "courseID"], axis=1, inplace=True)
+            data = data.append(data_temp, ignore_index=True)
+        print(f'[{i+1}/{n}] Reading data from file {path} - finished')
+    print('Reading data from all files - finished')
+
+    print('Processing - started')
+    data = StandardScaler().fit_transform(data)
+    principalComponents = PCA(n_components=9).fit_transform(data)
+    principalDf = pd.DataFrame(data = principalComponents, columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9'])
+    print('Processing - finished')
+
+    print('Saving to file - started')
+    filename = rf'{global_path}/PCA.csv'
+    headers = out_column_names()
+    principalDf.to_csv(filename, header=headers, mode = 'w', index=False)
+    print('Saving to file - finished')
+
 def read_data(path):
     #TODO add specific dtypes to get rid of the warning
     #dtype={"versionID": numpy.uint64}
@@ -45,13 +82,13 @@ def read_data(path):
     data = pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), parse_dates = indexes_of_date_columns)
     
     data.drop(excluded_columns(), axis=1, inplace=True)
-    data["status"] = data["status"].map({'UNKNOWN': None, 'STOPPED': '0', 'MOVING_SLOWLY': '1', 'MOVING': '2'})
-    data["timetableStatus"] = data["timetableStatus"].map({'UNSAFE': '0', 'SAFE': '1'})
-    #data["time"] = get_time(data["time"])
-    #data["plannedLeaveTime"] = get_time(data["plannedLeaveTime"])
-    #data["previousStopArrivalTime"] = get_time(data["previousStopArrivalTime"])
-    #data["previousStopLeaveTime"] = get_time(data["previousStopLeaveTime"])
-    #data["nextStopTimetableVisitTime"] = get_time(data["nextStopTimetableVisitTime"])
+    data["status"] = data["status"].map({'UNKNOWN': None, 'STOPPED': 0, 'MOVING_SLOWLY': 1, 'MOVING': 2})
+    data["timetableStatus"] = data["timetableStatus"].map({'UNSAFE': 0, 'SAFE': 1})
+    data["time"] = get_time(data["time"])
+    data["plannedLeaveTime"] = get_time(data["plannedLeaveTime"])
+    data["previousStopArrivalTime"] = get_time(data["previousStopArrivalTime"])
+    data["previousStopLeaveTime"] = get_time(data["previousStopLeaveTime"])
+    data["nextStopTimetableVisitTime"] = get_time(data["nextStopTimetableVisitTime"])
     data["atStop"] = data["atStop"].map({True: 1, False: 0})
     data["nearestStopDistance"] = round(data["nearestStopDistance"], 0).astype(int)
     data["previousStopDistance"] = round(data["previousStopDistance"], 0).astype(int)
@@ -101,7 +138,7 @@ def save_data_to_one_file(data):
 
     filename = rf'{global_path}/all.csv'
     headers = out_column_names(is_one_file = True)
-    data.to_csv(filename, header=headers, mode = 'w', index=False)
+    data.to_csv(filename, header=headers, mode = 'a+', index=False)
 
 def show_rows(data, amount):
     print(f'Data set size: {data.size}. First {amount} rows of data:\n')
@@ -166,9 +203,9 @@ def get_time(date_time_list):
     for date_time in date_time_list:
         if issubclass(type(date_time), type(pd.NaT)):
             # TODO: maybe we should calculate value based on neighbors
-            result.append("")
+            result.append(None)
         else:
-            result.append(date_time.strftime("%H:%M"))
+            result.append(int(date_time.strftime("%H%M")))
     return result
 
 def get_delay_status(delay_list):
