@@ -22,7 +22,7 @@ def create_single_file(path_to_directory):
 def parse_folder(path_to_directory, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    files = files[0:1]
+    #files = files[0:1]
     n = len(files)
     
     for i, filename in enumerate(files):
