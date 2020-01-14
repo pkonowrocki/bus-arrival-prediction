@@ -84,11 +84,17 @@ def read_data(path):
     data.drop(excluded_columns(), axis=1, inplace=True)
     data["status"] = data["status"].map({'UNKNOWN': None, 'STOPPED': 0, 'MOVING_SLOWLY': 1, 'MOVING': 2})
     data["timetableStatus"] = data["timetableStatus"].map({'UNSAFE': 0, 'SAFE': 1})
-    data["time"] = get_time(data["time"])
-    data["plannedLeaveTime"] = get_time(data["plannedLeaveTime"])
-    data["previousStopArrivalTime"] = get_time(data["previousStopArrivalTime"])
-    data["previousStopLeaveTime"] = get_time(data["previousStopLeaveTime"])
-    data["nextStopTimetableVisitTime"] = get_time(data["nextStopTimetableVisitTime"])
+    data["time_h"] = get_time(data["time"], "%H")
+    data["time_m"] = get_time(data["time"], "%M")
+    data["plannedLeaveTime_h"] = get_time(data["plannedLeaveTime"], "%H")
+    data["plannedLeaveTime_m"] = get_time(data["plannedLeaveTime"], "%M")
+    data["previousStopArrivalTime_h"] = get_time(data["previousStopArrivalTime"], "%H")
+    data["previousStopArrivalTime_m"] = get_time(data["previousStopArrivalTime"], "%M")
+    data["previousStopLeaveTime_h"] = get_time(data["previousStopLeaveTime"], "%H")
+    data["previousStopLeaveTime_m"] = get_time(data["previousStopLeaveTime"], "%M")
+    data["nextStopTimetableVisitTime_h"] = get_time(data["nextStopTimetableVisitTime"], "%H")
+    data["nextStopTimetableVisitTime_m"] = get_time(data["nextStopTimetableVisitTime"], "%M")
+    data.drop(["time", "plannedLeaveTime", "previousStopArrivalTime", "previousStopLeaveTime", "nextStopTimetableVisitTime"], axis=1, inplace=True)
     data["atStop"] = data["atStop"].map({True: 1, False: 0})
     data["nearestStopDistance"] = round(data["nearestStopDistance"], 0).astype(int)
     data["previousStopDistance"] = round(data["previousStopDistance"], 0).astype(int)
@@ -181,12 +187,16 @@ def in_column_names():
 
 def out_column_names(is_one_file = False):
     all_excluded_columns = excluded_columns()
+    all_excluded_columns.extend(["time", "plannedLeaveTime", "previousStopArrivalTime", "previousStopLeaveTime", "nextStopTimetableVisitTime"])
     all_excluded_columns.append("line")
     all_excluded_columns.append("courseID")
 
     all_columns = in_column_names()
     #all_columns.append("next_dist")
     #all_columns.append("sector")
+    all_columns.extend(["time_h", "time_m", "plannedLeaveTime_h", "plannedLeaveTime_m",
+     "previousStopArrivalTime_h", "previousStopArrivalTime_m", "previousStopLeaveTime_h",
+     "previousStopLeaveTime_m", "nextStopTimetableVisitTime_h", "nextStopTimetableVisitTime_m"])
     all_columns.append("delay_status")
     return [item for item in all_columns if item not in all_excluded_columns]
 
@@ -198,14 +208,17 @@ def excluded_columns():
         "overlapsWithNextBrigadeStopLineBrigade", "serverID", "delayAtStopStopID", "previousStopStopID", \
         "nextStopStopID", "courseDirectionStopStopID", "partition"]
 
-def get_time(date_time_list):
+def get_time(date_time_list, format):
     result = []
     for date_time in date_time_list:
         if issubclass(type(date_time), type(pd.NaT)):
             # TODO: maybe we should calculate value based on neighbors
             result.append(None)
         else:
-            result.append(int(date_time.strftime("%H%M")))
+            time = date_time.strftime(format)
+            if time[0] == '0':
+                time = time[1:]
+            result.append(time)
     return result
 
 def get_delay_status(delay_list):
