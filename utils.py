@@ -200,6 +200,9 @@ def out_column_names(is_one_file = False):
      "previousStopLeaveTime_m", "nextStopTimetableVisitTime_h", "nextStopTimetableVisitTime_m"])
     #all_columns.append("next_dist")
     #all_columns.append("sector")
+    all_columns.extend(["time_h", "time_m", "plannedLeaveTime_h", "plannedLeaveTime_m",
+     "previousStopArrivalTime_h", "previousStopArrivalTime_m", "previousStopLeaveTime_h",
+     "previousStopLeaveTime_m", "nextStopTimetableVisitTime_h", "nextStopTimetableVisitTime_m"])
     all_columns.append("delay_status")
     return [item for item in all_columns if item not in all_excluded_columns]
 
