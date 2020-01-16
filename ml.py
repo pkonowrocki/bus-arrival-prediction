@@ -7,49 +7,83 @@ from utils import traverse_directory
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
+import os
 
-def hashmap_to_single_df(filenames):
-    #filenames = traverse_directory("testing_data4/" + "/lines")
+def hashmap_to_single_df(path_to_traverse="testing_data4/" + "/lines"):
+    filenames = traverse_directory(path_to_traverse)
     csvs = []
     for line_number, list_of_lines in filenames.items():
         for line in list_of_lines:
-            data = pd.read_csv('testing_data2/lines/' + line_number + \
+            data = pd.read_csv('testing_data4/lines/' + line_number + \
                                             '/' + line)
             csvs.append(data)
     df = pd.concat(csvs)
-    df.to_csv("concatenated.csv", index=False)
+    df.to_csv("concatenated.csv", index=False, header=False)
 
-def split_train_test(df):
-    nth = 4
-    training_data = np.array()
-    testing_data = np.array()
+def convert_all_csv(path_to_traverse="testing_data/" + "/lines"):
+    filenames = traverse_directory(path_to_traverse)
+    csvs = []
 
-    #for i, row in df.iterrows():
-    #    if(i % nth == 0 and i != 0):
-    #        #testing_data.append(
-    #        pass
-        
-    #return training_data, testing_data
+    lines_directory = "testing_data4/c_lines"
+    if not os.path.exists(lines_directory):
+        os.makedirs(lines_directory)
 
-def count_delay_statuses(training_data):
-    zeros = len(training_data.loc[training_data["delay_status"] == 0])
-    ones = len(training_data.loc[training_data["delay_status"] == 1])
-    twos = len(training_data.loc[training_data["delay_status"] == 2])
+    for line_number, list_of_lines in filenames.items():
+        for line in list_of_lines:
+            path = "testing_data4/lines/" + line_number + "/" + line
+            changed_path = "testing_data4/c_lines/" + line_number + "/" + line
 
-    print(zeros)
-    print(ones)
-    print(twos)
+            if not os.path.exists(lines_directory + "/" + line_number):
+                os.makedirs(lines_directory + "/" + line_number)
+
+            data = pd.read_csv(path)
+            convert_single_csv(data, changed_path)
+            print("Reading file from path: ", path)
+
+def convert_single_csv(df, path):
+    labels = df.pop("delay_status").values.tolist()
+    list_of_lists = df.values.tolist()
+    data = []
+
+    for i in range(len(list_of_lists)):
+        current_row = list_of_lists[i]
+        if(i+2 < len(list_of_lists)):
+            next_row = list_of_lists[i+1]
+            next_next_row = list_of_lists[i+2]
+            label = labels[i+2]
+            data.append(current_row + next_row + next_next_row + [label])
+
+    df2 = pd.DataFrame.from_records(data)
+    df2.to_csv(path, index=False, header=False)
+    print("Saved to path: ", path)
+
+def count_delay_statuses(df):
+    zeros = len(df.loc[df["delay_status"] == 0])
+    ones = len(df.loc[df["delay_status"] == 1])
+    twos = len(df.loc[df["delay_status"] == 2])
+
+    n = len(df.index)
+    print("--------------------------")
+    print("delay_status == 0: ", 100 * zeros / n)
+    print("delay_status == 1: ", 100 * ones / n)
+    print("delay_status == 2: ", 100 * twos / n)
+    print("--------------------------")
 
 def learn(df):
     df.dropna(inplace=True)
-    df.pop("time")
-    df.pop("plannedLeaveTime")
-    df.pop("previousStopArrivalTime")
-    df.pop("previousStopLeaveTime")
-    df.pop("nextStopTimetableVisitTime")
+    df.drop(columns=["delay"], inplace=True)
+    df.drop(columns=["oldDelay"], inplace=True)
+    #df.drop(columns=["time"], inplace=True)
+    df.drop(columns=["plannedLeaveTime"], inplace=True)
+    df.drop(columns=["previousStopArrivalTime"], inplace=True)
+    df.drop(columns=["previousStopLeaveTime"], inplace=True)
+    df.drop(columns=["nextStopTimetableVisitTime"], inplace=True)
 
     #split_train_test(df)
+    count_delay_statuses(df)
     training_data, testing_data = train_test_split(df, test_size=0.3)
+    count_delay_statuses(training_data)
+    count_delay_statuses(testing_data)
     
     train_labels = training_data.pop("delay_status")
     test_labels = testing_data.pop("delay_status")
@@ -58,9 +92,10 @@ def learn(df):
     test_stats = testing_data.describe().transpose()
 
     normed_train_data = norm(training_data, train_stats)
+    print(normed_train_data.iloc[[1]].to_string())
     normed_test_data = norm(testing_data, train_stats)
     
-    number_of_features = 12
+    number_of_features = 11
 
     model = build_model(number_of_features)
 
@@ -71,8 +106,9 @@ def learn(df):
     test_loss, test_acc = model.evaluate(normed_test_data, test_labels)
 
     predictions = model.predict(normed_test_data)
-    print(predictions[0])
-    print(predictions[1])
+    #answers = []
+    #for prediction in predictions:
+    #    answers.append(np.argmax(prediction))
 
     print('\nTest accuracy:', test_acc)
 
@@ -80,6 +116,7 @@ def build_model(input_shape):
     model = keras.Sequential([
         layers.Dense(64, activation='relu', 
             input_shape=[input_shape]),
+        layers.Dense(32, activation='relu'),
         layers.Dense(3, activation='softmax'),
     ])
 

@@ -19,8 +19,10 @@ def main():
     # show_row_details(data, i=0)
 
     # filenames is hashmap in form of -> line (string) : list (list of strings)
-    df = pd.read_csv("concatenated")
-    learn(df)
+    #df = pd.read_csv("concatenated2.csv")
+    
+    #df = None
+    #learn(df)
     
 if __name__ == "__main__":
     main()
