@@ -9,33 +9,35 @@ import pandas as pd
 import numpy as np
 import os
 
+def is_non_zero_file(path):  
+    return os.path.isfile(path) and os.path.getsize(path) > 0
+
 # filenames is hashmap in form of -> line (string) : list (list of strings)
-def hashmap_to_single_df(path_to_traverse="testing_data4/" + "/lines"):
+def all_csv_to_single_csv(path_to_traverse, filename):
     filenames = traverse_directory(path_to_traverse)
     csvs = []
     for line_number, list_of_lines in filenames.items():
         for line in list_of_lines:
-            data = pd.read_csv('testing_data4/lines/' + line_number + \
-                                            '/' + line)
-            csvs.append(data)
+            path = path_to_traverse + '/' + line_number + '/' + line
+            if is_non_zero_file(path):
+                print("Processing: " + path)
+                data = pd.read_csv(path, header=None)
+                csvs.append(data)
     df = pd.concat(csvs)
-    df.to_csv("concatenated.csv", index=False, header=False)
+    df.to_csv(filename, index=False, header=False)
 
-def convert_all_csv(path_to_traverse="testing_data/" + "/lines"):
+def convert_all_csv(path_to_traverse, path_to_save):
     filenames = traverse_directory(path_to_traverse)
     csvs = []
 
-    lines_directory = "testing_data4/c_lines"
-    if not os.path.exists(lines_directory):
-        os.makedirs(lines_directory)
-
     for line_number, list_of_lines in filenames.items():
-        for line in list_of_lines:
-            path = "testing_data4/lines/" + line_number + "/" + line
-            changed_path = "testing_data4/c_lines/" + line_number + "/" + line
+        if not os.path.exists(path_to_save + "/" + line_number):
+            os.makedirs(path_to_save + "/" + line_number)
 
-            if not os.path.exists(lines_directory + "/" + line_number):
-                os.makedirs(lines_directory + "/" + line_number)
+        for line in list_of_lines:
+            path = path_to_traverse + "/" + line_number + "/" + line
+            changed_path = path_to_save + "/" + line_number + "/" + line
+
 
             data = pd.read_csv(path)
             convert_single_csv(data, changed_path)
@@ -71,10 +73,11 @@ def count_delay_statuses(df):
     print("--------------------------")
 
 def run_neural_network(df):
+    length = len(df.columns)
     training_data, testing_data = train_test_split(df, test_size=0.3)
     
-    train_labels = training_data.pop("delay_status")
-    test_labels = testing_data.pop("delay_status")
+    train_labels = training_data.pop(length - 1)
+    test_labels = testing_data.pop(length - 1)
 
     train_stats = training_data.describe().transpose()
     test_stats = testing_data.describe().transpose()
@@ -82,7 +85,7 @@ def run_neural_network(df):
     normed_train_data = norm(training_data, train_stats)
     normed_test_data = norm(testing_data, train_stats)
     
-    number_of_features = 11
+    number_of_features = length - 1
 
     model = build_model(number_of_features)
 

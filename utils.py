@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 #import geopy.distance
 from warsawSectors import WarsawSectors
 
-global_path = 'testing_data4'
+global_path = 'data'
 
 debug = False
 
