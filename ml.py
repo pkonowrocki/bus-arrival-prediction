@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import os
 
+# filenames is hashmap in form of -> line (string) : list (list of strings)
 def hashmap_to_single_df(path_to_traverse="testing_data4/" + "/lines"):
     filenames = traverse_directory(path_to_traverse)
     csvs = []
@@ -69,7 +70,7 @@ def count_delay_statuses(df):
     print("delay_status == 2: ", 100 * twos / n)
     print("--------------------------")
 
-def learn(df):
+def run_neural_network(df):
     df.dropna(inplace=True)
     df.drop(columns=["delay"], inplace=True)
     df.drop(columns=["oldDelay"], inplace=True)
