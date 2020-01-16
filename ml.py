@@ -71,20 +71,7 @@ def count_delay_statuses(df):
     print("--------------------------")
 
 def run_neural_network(df):
-    df.dropna(inplace=True)
-    df.drop(columns=["delay"], inplace=True)
-    df.drop(columns=["oldDelay"], inplace=True)
-    #df.drop(columns=["time"], inplace=True)
-    df.drop(columns=["plannedLeaveTime"], inplace=True)
-    df.drop(columns=["previousStopArrivalTime"], inplace=True)
-    df.drop(columns=["previousStopLeaveTime"], inplace=True)
-    df.drop(columns=["nextStopTimetableVisitTime"], inplace=True)
-
-    #split_train_test(df)
-    count_delay_statuses(df)
     training_data, testing_data = train_test_split(df, test_size=0.3)
-    count_delay_statuses(training_data)
-    count_delay_statuses(testing_data)
     
     train_labels = training_data.pop("delay_status")
     test_labels = testing_data.pop("delay_status")
@@ -93,23 +80,17 @@ def run_neural_network(df):
     test_stats = testing_data.describe().transpose()
 
     normed_train_data = norm(training_data, train_stats)
-    print(normed_train_data.iloc[[1]].to_string())
     normed_test_data = norm(testing_data, train_stats)
     
     number_of_features = 11
 
     model = build_model(number_of_features)
 
-    class_names = ["late", "early", "on time"]
-
     model.fit(normed_train_data, train_labels, epochs=1, verbose=1)
 
     test_loss, test_acc = model.evaluate(normed_test_data, test_labels)
 
     predictions = model.predict(normed_test_data)
-    #answers = []
-    #for prediction in predictions:
-    #    answers.append(np.argmax(prediction))
 
     print('\nTest accuracy:', test_acc)
 
