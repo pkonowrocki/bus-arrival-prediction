@@ -57,19 +57,19 @@ def parse_folder_PCA(path_to_directory):
         print(f'[{i+1}/{n}] Reading data from file {path} - finished')
     print('Reading data from all files - finished')
 
-    #print(data.shape)
     data.dropna(inplace=True)
-    #print(data.shape)
     print('Processing - started')
-    data = StandardScaler().fit_transform(data)
-    principalComponents = PCA(n_components=9).fit_transform(data)
-    principalDf = pd.DataFrame(data=principalComponents, columns=['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9'])
+    data_scaled = StandardScaler().fit_transform(data)
+    principalComponents = PCA(n_components=9).fit_transform(data_scaled)
+    PCA_columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9']
+    principalDf = pd.DataFrame(data=principalComponents, columns=PCA_columns)
+    principalDf["delay_status"] = data["delay_status"].values
     print('Processing - finished')
 
     print('Saving to file - started')
     filename = rf'{global_path}/PCA.csv'
-    headers = out_column_names()
-    principalDf.to_csv(filename, header=headers, mode = 'w', index=False)
+    PCA_columns.append("delay_status")
+    principalDf.to_csv(filename, header=PCA_columns, mode = 'w', index=False)
     print('Saving to file - finished')
 
 def read_data(path):
