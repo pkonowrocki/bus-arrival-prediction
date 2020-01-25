@@ -46,22 +46,16 @@ def main():
     Y_train = X_train.pop(length - 1)
     Y_test = X_test.pop(length - 1)
 
-    #train_stats = training_data.describe().transpose()
-    #test_stats = testing_data.describe().transpose()
-
-    #X_train = norm(training_data, train_stats)
-    #X_test = norm(testing_data, train_stats)
-
     #print("Running neural network on datasets")
-    predictions = run_neural_network(X_train, Y_train, X_test, Y_test)
+    #predictions = run_neural_network(X_train, Y_train, X_test, Y_test)
 
     #print("Running random forest on datasets")
     #run_random_forest(X_train, Y_train, X_test, Y_test)
 
-    #print("Running KMeans on datasets")
-    #run_k_means(X_train, Y_train, X_test, Y_test)
+    #print("Running decision tree on datasets")
+    run_decision_tree(X_train, Y_train, X_test, Y_test)
 
-    plot_predictions(predictions, Y_test)
+    #plot_predictions(predictions, Y_test)
 
 if __name__ == "__main__":
     main()

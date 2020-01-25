@@ -2,7 +2,8 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.cluster import KMeans
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 def run_neural_network(X_train, Y_train, X_test, Y_test):
     input_shape = X_train.shape[1:]
@@ -40,8 +41,14 @@ def run_random_forest(X_train, Y_train, X_test, Y_test):
     rf.fit(X_train, Y_train)
     print("Random forest classifier score: ", rf.score(X_test, Y_test))
 
-def run_k_means(X_train, Y_train, X_test, Y_test):
-    k_means = KMeans(n_clusters=10, random_state=0)
-    print("KMeans is fitting data")
-    k_means.fit(X_train, Y_train)
-    print("KMeans score: ", k_means.score(X_test, Y_test))
+def run_k_neighbors(X_train, Y_train, X_test, Y_test):
+    k_neighbors = KNeighborsClassifier(n_neighbors=3)
+    print("KNeighbors is fitting data")
+    k_neighbors.fit(X_train, Y_train)
+    print("KNeighbors score: ", k_neighbors.score(X_test, Y_test))
+
+def run_decision_tree(X_train, Y_train, X_test, Y_test):
+    decision_tree = DecisionTreeClassifier()
+    print("Decision tree is fitting data")
+    decision_tree.fit(X_train, Y_train)
+    print("Decision tree score: ", decision_tree.score(X_test, Y_test))
