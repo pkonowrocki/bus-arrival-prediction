@@ -142,7 +142,6 @@ def split_data_to_files(data, type, column_names):
             data_for_course.to_csv(filename, header=headers, mode = 'a+', index=False)
 
 def save_data_to_one_file(data):
-    data.drop("line", axis=1, inplace=True)
     data.drop("courseID", axis=1, inplace=True)
 
     filename = rf'{global_path}/all.csv'
