@@ -14,15 +14,15 @@ def main():
     #parse_folder_PCA(global_path + '2018-05-21', with_old_delay=False)
     #create_single_file(global_path + '2018-05-21', with_old_delay=True)
 
-    if not os.path.exists(global_path + "lines"):
+    if not os.path.exists(global_path + "lines-PCA"):
         print("Processing directory: ", global_path + directory_name)
-        parse_folder(global_path + directory_name)
-        print("Finished, all the data saved in" + global_path + "lines")
+        parse_folder_PCA(global_path + directory_name, with_old_delay=False)
+        print("Finished, all the data saved in" + global_path + "lines-PCA")
 
     if not os.path.exists(global_path + "c_lines"):
         os.makedirs(global_path + "c_lines")
         print("Processing all csv files to triples")
-        path_to_traverse = global_path + "lines"
+        path_to_traverse = global_path + "lines-PCA"
         path_to_save = global_path + "c_lines"
         convert_all_csv(path_to_traverse, path_to_save)
         print("Finished, all the data saved in: ", path_to_save)
@@ -36,29 +36,29 @@ def main():
 
     print("Reading data from " + filename_to_process)
     df = pd.read_csv(filename_to_process, header=None)
-    df.dropna(inplace=True)
+    #df.dropna(inplace=True)
     length = len(df.columns)
 
     print("Splitting data into training and test datasets")
-    training_data, testing_data = train_test_split(df, test_size=0.3)
+    X_train, X_test = train_test_split(df, test_size=0.3)
     
-    Y_train = training_data.pop(length - 1)
-    Y_test = testing_data.pop(length - 1)
+    Y_train = X_train.pop(length - 1)
+    Y_test = X_test.pop(length - 1)
 
-    train_stats = training_data.describe().transpose()
-    test_stats = testing_data.describe().transpose()
+    #train_stats = training_data.describe().transpose()
+    #test_stats = testing_data.describe().transpose()
 
-    X_train = norm(training_data, train_stats)
-    X_test = norm(testing_data, train_stats)
+    #X_train = norm(training_data, train_stats)
+    #X_test = norm(testing_data, train_stats)
 
     #print("Running neural network on datasets")
-    #run_neural_network(X_train, Y_train, X_test, Y_test)
+    run_neural_network(X_train, Y_train, X_test, Y_test)
 
     #print("Running random forest on datasets")
     #run_random_forest(X_train, Y_train, X_test, Y_test)
 
-    print("Running KMeans on datasets")
-    run_k_means(X_train, Y_train, X_test, Y_test)
+    #print("Running KMeans on datasets")
+    #run_k_means(X_train, Y_train, X_test, Y_test)
     
 if __name__ == "__main__":
     main()
