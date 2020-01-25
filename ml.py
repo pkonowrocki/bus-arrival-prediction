@@ -5,6 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from utils import traverse_directory
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
 import os
@@ -72,35 +73,22 @@ def count_delay_statuses(df):
     print("delay_status == 2: ", 100 * twos / n)
     print("--------------------------")
 
-def run_neural_network(df):
-    length = len(df.columns)
-    training_data, testing_data = train_test_split(df, test_size=0.3)
-    
-    train_labels = training_data.pop(length - 1)
-    test_labels = testing_data.pop(length - 1)
+def run_neural_network(X_train, Y_train, X_test, Y_test):
+    input_shape = X_train.shape[1:]
+    model = build_model(input_shape)
 
-    train_stats = training_data.describe().transpose()
-    test_stats = testing_data.describe().transpose()
+    # Fit model to the dataset
+    model.fit(X_train, Y_train, epochs=1, verbose=1)
 
-    normed_train_data = norm(training_data, train_stats)
-    normed_test_data = norm(testing_data, train_stats)
-    
-    number_of_features = length - 1
-
-    model = build_model(number_of_features)
-
-    model.fit(normed_train_data, train_labels, epochs=1, verbose=1)
-
-    test_loss, test_acc = model.evaluate(normed_test_data, test_labels)
-
-    predictions = model.predict(normed_test_data)
+    # Evaluate on the testing dataset
+    test_loss, test_acc = model.evaluate(X_test, Y_test)
 
     print('\nTest accuracy:', test_acc)
 
 def build_model(input_shape):
     model = keras.Sequential([
         layers.Dense(64, activation='relu', 
-            input_shape=[input_shape]),
+            input_shape=input_shape),
         layers.Dense(32, activation='relu'),
         layers.Dense(3, activation='softmax'),
     ])
@@ -111,8 +99,10 @@ def build_model(input_shape):
 
     return model
 
-def norm(x, stats):
-    return (x - stats['mean']) / stats['std']
+def run_random_forest(X_train, Y_train, X_test, Y_test):
+    rf = RandomForestClassifier(n_estimators=10, random_state=0, max_depth=2)
+    rf.fit(X_train, Y_train)
+    print(rf.score(X_test, Y_test))
 
 def plot_data(df: pd.DataFrame):
     sns.pairplot(df[["delay", "time", "plannedLeaveTime", "nearestStopDistance",

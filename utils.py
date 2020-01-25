@@ -22,7 +22,6 @@ def create_single_file(path_to_directory):
 def parse_folder(path_to_directory, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    #files = files[0:1]
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -40,7 +39,6 @@ def parse_folder(path_to_directory, is_one_file=False):
 def parse_folder_PCA(path_to_directory):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    files = files[0:2]
     n = len(files)
     data = None
 
@@ -200,9 +198,6 @@ def out_column_names(is_one_file = False):
      "previousStopLeaveTime_m", "nextStopTimetableVisitTime_h", "nextStopTimetableVisitTime_m"])
     #all_columns.append("next_dist")
     #all_columns.append("sector")
-    all_columns.extend(["time_h", "time_m", "plannedLeaveTime_h", "plannedLeaveTime_m",
-     "previousStopArrivalTime_h", "previousStopArrivalTime_m", "previousStopLeaveTime_h",
-     "previousStopLeaveTime_m", "nextStopTimetableVisitTime_h", "nextStopTimetableVisitTime_m"])
     all_columns.append("delay_status")
     return [item for item in all_columns if item not in all_excluded_columns]
 
@@ -231,7 +226,7 @@ def get_delay_status(delay_list):
     result = []
 
     for delay in delay_list:
-        if delay > 180:
+        if delay > 120:
             result.append(2)
         elif delay < -60:
             result.append(1)

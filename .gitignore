@@ -16,6 +16,12 @@
 /*.Rcheck/
 
 lines/
+testing_data/
+testing_data2/
+testing_data4/
+project.R
+concatenated.csv
+concatenated2.csv
 
 # RStudio files
 .Rproj.user/

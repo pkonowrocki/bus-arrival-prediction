@@ -1,5 +1,9 @@
 from utils import *
 from ml import *
+from sklearn.model_selection import train_test_split
+
+def norm(x, stats):
+    return (x - stats['mean']) / stats['std']
 
 global_path = "data/"
 directory_name = "2018-05-26"
@@ -29,12 +33,30 @@ def main():
         all_csv_to_single_csv(path_to_traverse, filename_to_process)
         print("Finished, filename to process is: ", filename_to_process)
 
-    if os.path.exists(filename_to_process):
-        df = pd.read_csv(filename_to_process, header=None)
-        df.dropna(inplace=True)
-        run_neural_network(df)
-    else:
-        raise Exception("File does not exist")
+    print("Reading data from " + filename_to_process)
+    df = pd.read_csv(filename_to_process, header=None)
+    df.dropna(inplace=True)
+    length = len(df.columns)
+
+    print("Splitting data into training and test datasets")
+    training_data, testing_data = train_test_split(df, test_size=0.3)
+    
+    Y_train = training_data.pop(length - 1)
+    Y_test = testing_data.pop(length - 1)
+
+    train_stats = training_data.describe().transpose()
+    test_stats = testing_data.describe().transpose()
+
+    X_train = norm(training_data, train_stats)
+    X_test = norm(testing_data, train_stats)
+
+    print("Running neural network on datasets")
+    run_neural_network(X_train, Y_train, X_test, Y_test)
+
+    #print("Running random forest on datasets")
+    #run_random_forest(X_train, Y_train, X_test, Y_test)
+
+    #run_k_means(X_train, Y_train, X_test, Y_test)
     
 if __name__ == "__main__":
     main()
