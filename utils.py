@@ -22,7 +22,7 @@ def create_single_file(path_to_directory):
 def parse_folder(path_to_directory, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    #files = files[0:1]
+    files = files[0:2]
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -30,7 +30,7 @@ def parse_folder(path_to_directory, is_one_file=False):
         print(f'[{i+1}/{n}] Reading data from file {path} - started')
         data = read_data(path)
         if not is_one_file:
-            split_data_to_files(data)
+            split_data_to_files(data, "normal", out_column_names())
         else:
             save_data_to_one_file(data)
         print(f'[{i+1}/{n}] Reading data from file {path} - finished')
@@ -49,27 +49,28 @@ def parse_folder_PCA(path_to_directory):
         print(f'[{i+1}/{n}] Reading data from file {path} - started')
         if data is None:
             data = read_data(path)
-            data.drop(["line", "courseID"], axis=1, inplace=True)
         else:
-            data_temp = read_data(path)
-            data_temp.drop(["line", "courseID"], axis=1, inplace=True)
-            data = data.append(data_temp, ignore_index=True)
+            data = data.append(read_data(path), ignore_index=True)
         print(f'[{i+1}/{n}] Reading data from file {path} - finished')
     print('Reading data from all files - finished')
 
     data.dropna(inplace=True)
+
+    data_for_PCA = data.drop(["delay_status", "line", "courseID"], axis=1)
+
     print('Processing - started')
-    data_scaled = StandardScaler().fit_transform(data)
+    data_scaled = StandardScaler().fit_transform(data_for_PCA)
     principalComponents = PCA(n_components=9).fit_transform(data_scaled)
     PCA_columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9']
     principalDf = pd.DataFrame(data=principalComponents, columns=PCA_columns)
     principalDf["delay_status"] = data["delay_status"].values
+    principalDf["line"] = data["line"].values
+    principalDf["courseID"] = data["courseID"].values
+    PCA_columns.extend(["delay_status", "line"])
     print('Processing - finished')
 
     print('Saving to file - started')
-    filename = rf'{global_path}/PCA.csv'
-    PCA_columns.append("delay_status")
-    principalDf.to_csv(filename, header=PCA_columns, mode = 'w', index=False)
+    split_data_to_files(principalDf, "PCA", PCA_columns)
     print('Saving to file - finished')
 
 def read_data(path):
@@ -108,8 +109,8 @@ def read_data(path):
     #data["sector"] = get_sectors(data["lon"], data["lat"])
     return data
 
-def split_data_to_files(data):
-    parent_directory = rf'{global_path}/lines'
+def split_data_to_files(data, type, column_names):
+    parent_directory = rf'{global_path}/lines-{type}'
     if not os.path.exists(parent_directory):
         os.makedirs(parent_directory)
 
@@ -121,7 +122,6 @@ def split_data_to_files(data):
             os.makedirs(directory)
 
         data_for_line = data.loc[data['line'] == line]
-        data_for_line.drop("line", axis=1, inplace=True)
 
         courses = data_for_line['courseID'].unique()
 
@@ -138,7 +138,7 @@ def split_data_to_files(data):
 
             filename = rf'{directory}/{line}-{course}.csv'
             # Only add headers if file does not exist yet
-            headers = None if os.path.exists(filename) else out_column_names()
+            headers = None if os.path.exists(filename) else column_names
             data_for_course.to_csv(filename, header=headers, mode = 'a+', index=False)
 
 def save_data_to_one_file(data):
@@ -191,7 +191,6 @@ def in_column_names():
 def out_column_names(is_one_file = False):
     all_excluded_columns = excluded_columns()
     all_excluded_columns.extend(["time", "plannedLeaveTime", "previousStopArrivalTime", "previousStopLeaveTime", "nextStopTimetableVisitTime"])
-    all_excluded_columns.append("line")
     all_excluded_columns.append("courseID")
 
     all_columns = in_column_names()
@@ -200,9 +199,6 @@ def out_column_names(is_one_file = False):
      "previousStopLeaveTime_m", "nextStopTimetableVisitTime_h", "nextStopTimetableVisitTime_m"])
     #all_columns.append("next_dist")
     #all_columns.append("sector")
-    all_columns.extend(["time_h", "time_m", "plannedLeaveTime_h", "plannedLeaveTime_m",
-     "previousStopArrivalTime_h", "previousStopArrivalTime_m", "previousStopLeaveTime_h",
-     "previousStopLeaveTime_m", "nextStopTimetableVisitTime_h", "nextStopTimetableVisitTime_m"])
     all_columns.append("delay_status")
     return [item for item in all_columns if item not in all_excluded_columns]
 
