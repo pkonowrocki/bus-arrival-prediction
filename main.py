@@ -50,13 +50,14 @@ def main():
     X_train = norm(training_data, train_stats)
     X_test = norm(testing_data, train_stats)
 
-    print("Running neural network on datasets")
-    run_neural_network(X_train, Y_train, X_test, Y_test)
+    #print("Running neural network on datasets")
+    #run_neural_network(X_train, Y_train, X_test, Y_test)
 
     #print("Running random forest on datasets")
     #run_random_forest(X_train, Y_train, X_test, Y_test)
 
-    #run_k_means(X_train, Y_train, X_test, Y_test)
+    print("Running KMeans on datasets")
+    run_k_means(X_train, Y_train, X_test, Y_test)
     
 if __name__ == "__main__":
     main()
