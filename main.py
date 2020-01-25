@@ -6,9 +6,9 @@ directory_name = "2018-05-26"
 
 def main():
     # Process all files in one directory
-    #data = parse_folder(global_path + '2018-05-21')
-    #parse_folder_PCA(global_path + '2018-05-21')
-    #create_single_file(global_path + '2018-05-21')
+    #parse_folder(global_path + '2018-05-21', with_old_delay=True)
+    #parse_folder_PCA(global_path + '2018-05-21', with_old_delay=False)
+    #create_single_file(global_path + '2018-05-21', with_old_delay=True)
 
     if not os.path.exists(global_path + "lines"):
         print("Processing directory: ", global_path + directory_name)

@@ -16,10 +16,10 @@ def parse_file(path_to_file):
     split_data_to_files(data)
     return data
 
-def create_single_file(path_to_directory):
-    parse_folder(path_to_directory, is_one_file=True)
+def create_single_file(path_to_directory, with_old_delay):
+    parse_folder(path_to_directory, with_old_delay, is_one_file=True)
 
-def parse_folder(path_to_directory, is_one_file=False):
+def parse_folder(path_to_directory, with_old_delay, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
     files = files[0:2]
@@ -28,16 +28,16 @@ def parse_folder(path_to_directory, is_one_file=False):
     for i, filename in enumerate(files):
         path = f'{path_to_directory}/{filename}'
         print(f'[{i+1}/{n}] Reading data from file {path} - started')
-        data = read_data(path)
+        data = read_data(path, with_old_delay)
         if not is_one_file:
-            split_data_to_files(data, "normal", out_column_names())
+            split_data_to_files(data, "normal", out_column_names(with_old_delay))
         else:
-            save_data_to_one_file(data)
+            save_data_to_one_file(data, with_old_delay)
         print(f'[{i+1}/{n}] Reading data from file {path} - finished')
     print('Reading data from all files - finished')
     return data
 
-def parse_folder_PCA(path_to_directory):
+def parse_folder_PCA(path_to_directory, with_old_delay):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
     files = files[0:2]
@@ -48,15 +48,15 @@ def parse_folder_PCA(path_to_directory):
         path = f'{path_to_directory}/{filename}'
         print(f'[{i+1}/{n}] Reading data from file {path} - started')
         if data is None:
-            data = read_data(path)
+            data = read_data(path, with_old_delay)
         else:
-            data = data.append(read_data(path), ignore_index=True)
+            data = data.append(read_data(path, with_old_delay), ignore_index=True)
         print(f'[{i+1}/{n}] Reading data from file {path} - finished')
     print('Reading data from all files - finished')
 
     data.dropna(inplace=True)
 
-    data_for_PCA = data.drop(["delay_status", "line", "courseID"], axis=1)
+    data_for_PCA = data.drop(["delay_status", "courseID"], axis=1)
 
     print('Processing - started')
     data_scaled = StandardScaler().fit_transform(data_for_PCA)
@@ -66,14 +66,14 @@ def parse_folder_PCA(path_to_directory):
     principalDf["delay_status"] = data["delay_status"].values
     principalDf["line"] = data["line"].values
     principalDf["courseID"] = data["courseID"].values
-    PCA_columns.extend(["delay_status", "line"])
+    PCA_columns.extend(["delay_status"])
     print('Processing - finished')
 
     print('Saving to file - started')
-    split_data_to_files(principalDf, "PCA", PCA_columns)
+    split_data_to_files(principalDf, "PCA", PCA_columns, is_PCA=True)
     print('Saving to file - finished')
 
-def read_data(path):
+def read_data(path, with_old_delay):
     #TODO add specific dtypes to get rid of the warning
     #dtype={"versionID": numpy.uint64}
 
@@ -86,6 +86,9 @@ def read_data(path):
     data = pd.read_csv(path, sep=';', header=None, names=col_idx.keys(), parse_dates = indexes_of_date_columns)
     
     data.drop(excluded_columns(), axis=1, inplace=True)
+    if not with_old_delay:
+        data.drop("oldDelay", axis=1, inplace=True)
+    data["line"] = get_line(data["line"])
     data["status"] = data["status"].map({'UNKNOWN': None, 'STOPPED': 0, 'MOVING_SLOWLY': 1, 'MOVING': 2})
     data["timetableStatus"] = data["timetableStatus"].map({'UNSAFE': 0, 'SAFE': 1})
     data["time_h"] = get_time(data["time"], "%H")
@@ -104,12 +107,13 @@ def read_data(path):
     data["previousStopDistance"] = round(data["previousStopDistance"], 0).astype(int)
     data["nextStopDistance"] = round(data["nextStopDistance"], 0).astype(int)
     data["delay_status"] = get_delay_status(data["delay"])
+    data.drop("delay", axis=1, inplace=True)
     # below is not needed, I leave it here in case it's useful in future
     #data["next_dist"] = distance_between_2_points(data["lon"], data["lat"], data["nearestStopLon"], data["nearestStopLat"])
     #data["sector"] = get_sectors(data["lon"], data["lat"])
     return data
 
-def split_data_to_files(data, type, column_names):
+def split_data_to_files(data, type, column_names, is_PCA=False):
     parent_directory = rf'{global_path}/lines-{type}'
     if not os.path.exists(parent_directory):
         os.makedirs(parent_directory)
@@ -122,6 +126,8 @@ def split_data_to_files(data, type, column_names):
             os.makedirs(directory)
 
         data_for_line = data.loc[data['line'] == line]
+        if is_PCA:
+            data_for_line.drop("line", axis=1, inplace=True)
 
         courses = data_for_line['courseID'].unique()
 
@@ -141,11 +147,12 @@ def split_data_to_files(data, type, column_names):
             headers = None if os.path.exists(filename) else column_names
             data_for_course.to_csv(filename, header=headers, mode = 'a+', index=False)
 
-def save_data_to_one_file(data):
+def save_data_to_one_file(data, with_old_delay):
     data.drop("courseID", axis=1, inplace=True)
+    data.drop("delay_status", axis=1, inplace=True)
 
     filename = rf'{global_path}/all.csv'
-    headers = out_column_names(is_one_file = True)
+    headers = None if os.path.exists(filename) else out_column_names(with_old_delay, is_one_file = True)
     data.to_csv(filename, header=headers, mode = 'a+', index=False)
 
 def show_rows(data, amount):
@@ -187,10 +194,13 @@ def in_column_names():
                   "nextStopStopSequence", "delayAtStopStopID", "previousStopStopID", \
                   "nextStopStopID", "courseDirectionStopStopID", "partition"]
 
-def out_column_names(is_one_file = False):
+def out_column_names(with_old_delay, is_one_file = False):
     all_excluded_columns = excluded_columns()
     all_excluded_columns.extend(["time", "plannedLeaveTime", "previousStopArrivalTime", "previousStopLeaveTime", "nextStopTimetableVisitTime"])
     all_excluded_columns.append("courseID")
+    all_excluded_columns.append("delay")
+    if not with_old_delay:
+        all_excluded_columns.append("oldDelay")
 
     all_columns = in_column_names()
     all_columns.extend(["time_h", "time_m", "plannedLeaveTime_h", "plannedLeaveTime_m",
@@ -198,7 +208,8 @@ def out_column_names(is_one_file = False):
      "previousStopLeaveTime_m", "nextStopTimetableVisitTime_h", "nextStopTimetableVisitTime_m"])
     #all_columns.append("next_dist")
     #all_columns.append("sector")
-    all_columns.append("delay_status")
+    if not is_one_file:
+        all_columns.append("delay_status")
     return [item for item in all_columns if item not in all_excluded_columns]
 
 def excluded_columns():
@@ -208,6 +219,24 @@ def excluded_columns():
         "receivedTime", "processingFinishedTime", "onWayToDepot", "overlapsWithNextBrigade", \
         "overlapsWithNextBrigadeStopLineBrigade", "serverID", "delayAtStopStopID", "previousStopStopID", \
         "nextStopStopID", "courseDirectionStopStopID", "partition"]
+
+def get_line(line_list):
+    result = []
+    for line in line_list:
+        if line[0].isnumeric():
+            single_result = line
+        else:
+            if line == 'Z':
+                single_result = 999
+            elif line[1].isnumeric() and line[1] is not '0':
+                single_result = int(line[1:])
+            else:
+                single_result =  int(line[2:]) if line[2:].isnumeric() else None
+
+            if single_result == 'L':
+                single_result = 998
+        result.append(single_result)
+    return result
 
 def get_time(date_time_list, format):
     result = []
