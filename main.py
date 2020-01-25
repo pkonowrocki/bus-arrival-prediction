@@ -1,5 +1,6 @@
 from utils import *
 from ml import *
+from plotting_functions import *
 from sklearn.model_selection import train_test_split
 
 def norm(x, stats):
@@ -52,13 +53,15 @@ def main():
     #X_test = norm(testing_data, train_stats)
 
     #print("Running neural network on datasets")
-    run_neural_network(X_train, Y_train, X_test, Y_test)
+    predictions = run_neural_network(X_train, Y_train, X_test, Y_test)
 
     #print("Running random forest on datasets")
     #run_random_forest(X_train, Y_train, X_test, Y_test)
 
     #print("Running KMeans on datasets")
     #run_k_means(X_train, Y_train, X_test, Y_test)
-    
+
+    plot_predictions(predictions, Y_test)
+
 if __name__ == "__main__":
     main()

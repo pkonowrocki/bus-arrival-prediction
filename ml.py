@@ -16,6 +16,10 @@ def run_neural_network(X_train, Y_train, X_test, Y_test):
 
     print('\nTest accuracy:', test_acc)
 
+    predictions = model.predict(X_test)
+
+    return predictions
+
 def build_model(input_shape):
     model = keras.Sequential([
         layers.Dense(64, activation='relu', 
