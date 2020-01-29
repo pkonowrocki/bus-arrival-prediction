@@ -4,13 +4,17 @@ from tensorflow.keras import layers
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 def run_neural_network(X_train, Y_train, X_test, Y_test):
     input_shape = X_train.shape[1:]
     model = build_model(input_shape)
 
+    # Early stopping
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+
     # Fit model to the dataset
-    model.fit(X_train, Y_train, epochs=1, verbose=1)
+    history = model.fit(X_train, Y_train, epochs=40, verbose=1, validation_split=0.2, callbacks=[es])
 
     # Evaluate on the testing dataset
     test_loss, test_acc = model.evaluate(X_test, Y_test)
@@ -19,7 +23,7 @@ def run_neural_network(X_train, Y_train, X_test, Y_test):
 
     predictions = model.predict(X_test)
 
-    return predictions
+    return predictions, history
 
 def build_model(input_shape):
     model = keras.Sequential([

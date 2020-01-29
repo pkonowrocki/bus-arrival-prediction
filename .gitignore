@@ -49,3 +49,10 @@ __pycache__/*
 
 # Project's data
 data/*
+
+# latex stuff
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc

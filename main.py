@@ -37,7 +37,6 @@ def main():
 
     print("Reading data from " + filename_to_process)
     df = pd.read_csv(filename_to_process, header=None)
-    #df.dropna(inplace=True)
     length = len(df.columns)
 
     print("Splitting data into training and test datasets")
@@ -47,15 +46,16 @@ def main():
     Y_test = X_test.pop(length - 1)
 
     #print("Running neural network on datasets")
-    #predictions = run_neural_network(X_train, Y_train, X_test, Y_test)
+    predictions, history = run_neural_network(X_train, Y_train, X_test, Y_test)
 
     #print("Running random forest on datasets")
     #run_random_forest(X_train, Y_train, X_test, Y_test)
 
     #print("Running decision tree on datasets")
-    run_decision_tree(X_train, Y_train, X_test, Y_test)
+    #run_decision_tree(X_train, Y_train, X_test, Y_test)
 
     #plot_predictions(predictions, Y_test)
+    plot_training_process(history)
 
 if __name__ == "__main__":
     main()
