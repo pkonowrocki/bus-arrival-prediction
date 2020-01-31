@@ -11,6 +11,69 @@ global_path = 'data'
 
 debug = False
 
+def is_non_zero_file(path):  
+    return os.path.isfile(path) and os.path.getsize(path) > 0
+
+# filenames is hashmap in form of -> line (string) : list (list of strings)
+def all_csv_to_single_csv(path_to_traverse, filename):
+    filenames = traverse_directory(path_to_traverse)
+    csvs = []
+    for line_number, list_of_lines in filenames.items():
+        for line in list_of_lines:
+            path = path_to_traverse + '/' + line_number + '/' + line
+            if is_non_zero_file(path):
+                print("Processing: " + path)
+                data = pd.read_csv(path, header=None)
+                csvs.append(data)
+    df = pd.concat(csvs)
+    df.to_csv(filename, index=False, header=False)
+
+def convert_all_csv(path_to_traverse, path_to_save):
+    filenames = traverse_directory(path_to_traverse)
+    csvs = []
+
+    for line_number, list_of_lines in filenames.items():
+        if not os.path.exists(path_to_save + "/" + line_number):
+            os.makedirs(path_to_save + "/" + line_number)
+
+        for line in list_of_lines:
+            path = path_to_traverse + "/" + line_number + "/" + line
+            changed_path = path_to_save + "/" + line_number + "/" + line
+
+
+            data = pd.read_csv(path)
+            convert_single_csv(data, changed_path)
+            print("Reading file from path: ", path)
+
+def convert_single_csv(df, path):
+    labels = df.pop("delay_status").values.tolist()
+    list_of_lists = df.values.tolist()
+    data = []
+
+    for i in range(len(list_of_lists)):
+        current_row = list_of_lists[i]
+        if(i+2 < len(list_of_lists)):
+            next_row = list_of_lists[i+1]
+            next_next_row = list_of_lists[i+2]
+            label = labels[i+2]
+            data.append(current_row + next_row + next_next_row + [label])
+
+    df2 = pd.DataFrame.from_records(data)
+    df2.to_csv(path, index=False, header=False)
+    print("Saved to path: ", path)
+
+def count_delay_statuses(df):
+    zeros = len(df.loc[df["delay_status"] == 0])
+    ones = len(df.loc[df["delay_status"] == 1])
+    twos = len(df.loc[df["delay_status"] == 2])
+
+    n = len(df.index)
+    print("--------------------------")
+    print("delay_status == 0: ", 100 * zeros / n)
+    print("delay_status == 1: ", 100 * ones / n)
+    print("delay_status == 2: ", 100 * twos / n)
+    print("--------------------------")
+
 def parse_file(path_to_file):
     data = read_data(path_to_file)
     split_data_to_files(data)
@@ -22,7 +85,6 @@ def create_single_file(path_to_directory, with_old_delay):
 def parse_folder(path_to_directory, with_old_delay, is_one_file=False):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    files = files[0:2]
     n = len(files)
     
     for i, filename in enumerate(files):
@@ -40,7 +102,6 @@ def parse_folder(path_to_directory, with_old_delay, is_one_file=False):
 def parse_folder_PCA(path_to_directory, with_old_delay):
     print('Reading data from all files - started')
     files = os.listdir(path_to_directory)
-    files = files[0:2]
     n = len(files)
     data = None
 
@@ -255,7 +316,7 @@ def get_delay_status(delay_list):
     result = []
 
     for delay in delay_list:
-        if delay > 180:
+        if delay > 120:
             result.append(2)
         elif delay < -60:
             result.append(1)
